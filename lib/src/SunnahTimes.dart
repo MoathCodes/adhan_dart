@@ -1,18 +1,17 @@
 import 'package:adhan_dart/adhan_dart.dart';
 
-
 class SunnahTimes {
   late DateTime middleOfTheNight;
   late DateTime lastThirdOfTheNight;
 
-  SunnahTimes(PrayerTimes prayerTimes, {bool precision = true}) {
+  SunnahTimes(PrayerTimesData prayerTimes, {bool precision = true}) {
     final DateTime nextDay = prayerTimes.date.addDays(1);
 
-    // Use legacy constructor for now; will switch to immutable calculator later.
-    final PrayerTimes nextDayPrayerTimes = PrayerTimes(
-      coordinates: prayerTimes.coordinates,
+    // Retrieve next-day prayer times via calculator
+    final nextDayPrayerTimes = const PrayerTimesCalculator().calculate(
       date: nextDay,
-      calculationParameters: prayerTimes.calculationParameters,
+      coordinates: prayerTimes.coordinates,
+      params: prayerTimes.params,
       precision: precision,
     );
 

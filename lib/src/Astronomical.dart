@@ -1,7 +1,9 @@
 import 'dart:math';
 
-import 'package:adhan_dart/src/MathUtils.dart';
-import 'package:adhan_dart/src/DateUtils.dart';
+import 'package:adhan_dart/src/extensions.dart';
+
+
+
 
 class Astronomical {
   /* The geometric mean longitude of the sun in degrees. */
@@ -301,7 +303,7 @@ class Astronomical {
       }
     }
 
-    return dateByAddingSeconds(sunrise, (adjustment() * -60.0).round());
+    return sunrise.addSeconds((adjustment() * -60.0).round());
   }
 
   static DateTime seasonAdjustedEveningTwilight(
@@ -328,7 +330,7 @@ class Astronomical {
       }
     }
 
-    return dateByAddingSeconds(sunset, (adjustment() * 60.0).round());
+    return sunset.addSeconds((adjustment() * 60.0).round());
   }
 
   static int daysSinceSolstice(int dayOfYear, int year, double latitude) {

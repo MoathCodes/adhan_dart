@@ -18,10 +18,10 @@ main() {
   CalculationParameters params = CalculationMethodParameters.ummAlQura();
   // params.madhab = Madhab.shafi;
   // params.highLatitudeRule = HighLatitudeRule.seventhOfTheNight;
-  PrayerTimes prayerTimes = PrayerTimes(
-      coordinates: coordinates,
+  final prayerTimes = const PrayerTimesCalculator().calculate(
       date: date,
-      calculationParameters: params,
+      coordinates: coordinates,
+      params: params,
       precision: true);
 
   // Prayer times
@@ -37,14 +37,14 @@ main() {
   DateTime fajrafterTime = tz.TZDateTime.from(prayerTimes.fajrAfter, location);
 
   // Convenience Utilities
-  Prayer current =
+  final Prayer current =
       prayerTimes.currentPrayer(date: DateTime.now()); // date: date
   DateTime? currentPrayerTime = prayerTimes.timeForPrayer(current);
-  Prayer next = prayerTimes.nextPrayer();
+  final Prayer next = prayerTimes.nextPrayer();
   DateTime? nextPrayerTime = prayerTimes.timeForPrayer(next);
 
   // Sunnah Times
-  SunnahTimes sunnahTimes = SunnahTimes(prayerTimes);
+  final sunnahTimes = SunnahTimes(prayerTimes);
   DateTime middleOfTheNight =
       tz.TZDateTime.from(sunnahTimes.middleOfTheNight, location);
   DateTime lastThirdOfTheNight =

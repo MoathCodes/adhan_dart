@@ -4,8 +4,7 @@ import 'package:adhan_dart/src/Astronomical.dart';
 import 'package:adhan_dart/src/SolarTime.dart';
 import 'package:adhan_dart/src/TimeComponents.dart';
 
-import 'extensions.dart';
-import 'prayer_times_data.dart';
+
 
 /// Temporary bridge calculator that produces an immutable [PrayerTimesData]
 /// object while still delegating the heavy lifting to the legacy

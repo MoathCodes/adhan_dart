@@ -1,17 +1,17 @@
-/// Collection of small Dart extensions that replace helper functions
-/// originally ported from JavaScript.
-///
-/// Keeping them together simplifies import management while we migrate the
-/// codebase.  Once the refactor is complete we can split into domain-specific
-/// files if desired.
+/// Dart extensions and utility functions for the adhan_dart library.
+/// Provides idiomatic Dart replacements for legacy JavaScript-style helpers.
+library extensions;
 
 import 'dart:math' as math;
 
+import 'package:adhan_dart/adhan_dart.dart';
+
+/// Extensions for common DateTime operations.
 extension DateTimeExtensions on DateTime {
   /// Returns the day of year (1-based).
   int get dayOfYear {
-    final first = DateTime(year, 1, 1);
-    return difference(first).inDays + 1;
+    final diff = difference(DateTime(year, 1, 1, 0, 0));
+    return diff.inDays + 1; // 1st Jan should be day 1
   }
 
   /// Adds [days] days and returns a new `DateTime`.
@@ -27,12 +27,71 @@ extension DateTimeExtensions on DateTime {
   /// original instance is returned.
   DateTime roundedMinute({bool precision = true}) {
     if (precision) return this;
-    final seconds = toUtc().second;
-    final offset = seconds >= 30 ? 60 - seconds : -seconds;
-    return add(Duration(seconds: offset));
+    final seconds = toUtc().second % 60;
+    final offset = seconds >= 30 ? 60 - seconds : -1 * seconds;
+    return addSeconds(offset);
   }
 }
 
+extension CalculationMethodParametersExtension on CalculationMethod{
+  CalculationParameters get parameters {
+    switch (this) {
+      case CalculationMethod.muslimWorldLeague:
+        return CalculationMethodParameters.muslimWorldLeague();
+      case CalculationMethod.egyptian:
+        return CalculationMethodParameters.egyptian();
+      case CalculationMethod.karachi:
+        return CalculationMethodParameters.karachi();
+      case CalculationMethod.ummAlQura:
+        return CalculationMethodParameters.ummAlQura();
+      case CalculationMethod.moonsightingCommittee:
+        return CalculationMethodParameters.moonsightingCommittee();
+      case CalculationMethod.dubai:
+        return CalculationMethodParameters.dubai();
+      case CalculationMethod.kuwait:
+        return CalculationMethodParameters.kuwait();
+      case CalculationMethod.morocco:
+        return CalculationMethodParameters.morocco();
+      case CalculationMethod.northAmerica:
+        return CalculationMethodParameters.northAmerica();
+      case CalculationMethod.other:
+        return CalculationMethodParameters.other();
+      case CalculationMethod.qatar:
+        return CalculationMethodParameters.qatar();
+      case CalculationMethod.singapore:
+        return CalculationMethodParameters.singapore();
+      case CalculationMethod.tehran:
+        return CalculationMethodParameters.tehran();
+      case CalculationMethod.turkiye:
+        return CalculationMethodParameters.turkiye();
+    }
+  }
+}
+
+// Mathematical utility functions
+double degreesToRadians(double degrees) => (degrees * math.pi) / 180.0;
+
+double radiansToDegrees(double radians) => (radians * 180.0) / math.pi;
+
+double normalizeToScale(double number, double max) {
+  return number - (max * ((number / max).floor()));
+}
+
+double unwindAngle(double angle) => normalizeToScale(angle, 360.0);
+
+double quadrantShiftAngle(double angle) {
+  if (angle >= -180 && angle <= 180) {
+    return angle;
+  }
+  return angle - (360 * (angle / 360).round());
+}
+
+int dayOfYear(DateTime date) {
+  final diff = date.difference(DateTime(date.year, 1, 1, 0, 0));
+  return diff.inDays + 1; // 1st Jan should be day 1
+}
+
+/// Extensions for common angle operations on numbers.
 extension NumAngleExtensions on double {
   /// Converts radians to degrees.
   double get toDegrees => (this * 180.0) / math.pi;

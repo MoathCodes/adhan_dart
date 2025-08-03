@@ -13,12 +13,12 @@ main() {
   Coordinates coordinates = const Coordinates(35.78056, -78.6389);
 
   // Parameters
-  CalculationParameters params = CalculationMethodParameters.muslimWorldLeague()
-    ..madhab = Madhab.hanafi;
-  PrayerTimes prayerTimes = PrayerTimes(
-      coordinates: coordinates,
+  final params = CalculationMethodParameters.muslimWorldLeague()
+      .copyWith(madhab: Madhab.hanafi);
+  final prayerTimes = const PrayerTimesCalculator().calculate(
       date: date,
-      calculationParameters: params,
+      coordinates: coordinates,
+      params: params,
       precision: true);
 
   // Prayer times
@@ -34,14 +34,14 @@ main() {
   DateTime fajrafterTime = tz.TZDateTime.from(prayerTimes.fajrAfter, location);
 
   // Convenience Utilities
-  Prayer current =
+  final Prayer current =
       prayerTimes.currentPrayer(date: DateTime.now()); // date: date
   DateTime? currentPrayerTime = prayerTimes.timeForPrayer(current);
-  Prayer next = prayerTimes.nextPrayer();
+  final Prayer next = prayerTimes.nextPrayer();
   DateTime? nextPrayerTime = prayerTimes.timeForPrayer(next);
 
   // Sunnah Times
-  SunnahTimes sunnahTimes = SunnahTimes(prayerTimes);
+  final sunnahTimes = SunnahTimes(prayerTimes);
   DateTime middleOfTheNight =
       tz.TZDateTime.from(sunnahTimes.middleOfTheNight, location);
   DateTime lastThirdOfTheNight =

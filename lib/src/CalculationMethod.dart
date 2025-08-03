@@ -14,95 +14,145 @@ enum CalculationMethod {
   singapore,
   tehran,
   turkiye,
-  ummAlQura,
+  ummAlQura;
 }
 
 /// Various calculation methods
 class CalculationMethodParameters {
   // Dubai
   static CalculationParameters dubai() {
-    CalculationParameters params = CalculationParameters(
-        method: CalculationMethod.dubai, fajrAngle: 18.2, ishaAngle: 18.2);
-    params.methodAdjustments = {
-      Prayer.sunrise: -3,
-      Prayer.dhuhr: 3,
-      Prayer.asr: 3,
-      Prayer.maghrib: 3
-    };
-    return params;
+    return const CalculationParameters(
+      method: CalculationMethod.dubai,
+      fajrAngle: 18.2,
+      ishaAngle: 18.2,
+      methodAdjustments: {
+        Prayer.fajr: 0,
+        Prayer.sunrise: -3,
+        Prayer.dhuhr: 3,
+        Prayer.asr: 3,
+        Prayer.maghrib: 3,
+        Prayer.isha: 0,
+      },
+    );
   }
 
   // Egyptian General Authority of Survey
   static CalculationParameters egyptian() {
-    CalculationParameters params = CalculationParameters(
-        method: CalculationMethod.egyptian, fajrAngle: 19.5, ishaAngle: 17.5);
-    params.methodAdjustments = {Prayer.dhuhr: 1};
-    return params;
+    return const CalculationParameters(
+      method: CalculationMethod.egyptian,
+      fajrAngle: 19.5,
+      ishaAngle: 17.5,
+      methodAdjustments: {
+        Prayer.fajr: 0,
+        Prayer.sunrise: 0,
+        Prayer.dhuhr: 1,
+        Prayer.asr: 0,
+        Prayer.maghrib: 0,
+        Prayer.isha: 0,
+      },
+    );
   }
 
   // University of Islamic Sciences, Karachi
   static CalculationParameters karachi() {
-    CalculationParameters params = CalculationParameters(
-        method: CalculationMethod.karachi, fajrAngle: 18, ishaAngle: 18);
-    params.methodAdjustments = {Prayer.dhuhr: 1};
-    return params;
+    return const CalculationParameters(
+      method: CalculationMethod.karachi,
+      fajrAngle: 18,
+      ishaAngle: 18,
+      methodAdjustments: {
+        Prayer.fajr: 0,
+        Prayer.sunrise: 0,
+        Prayer.dhuhr: 1,
+        Prayer.asr: 0,
+        Prayer.maghrib: 0,
+        Prayer.isha: 0,
+      },
+    );
   }
 
   // Kuwait
   static CalculationParameters kuwait() {
-    return CalculationParameters(
+    return const CalculationParameters(
         method: CalculationMethod.kuwait, fajrAngle: 18, ishaAngle: 17.5);
   }
 
   // Moonsighting Committee
   static CalculationParameters moonsightingCommittee() {
-    CalculationParameters params = CalculationParameters(
-        method: CalculationMethod.moonsightingCommittee,
-        fajrAngle: 18,
-        ishaAngle: 18);
-    params.methodAdjustments = {Prayer.dhuhr: 5, Prayer.maghrib: 3};
-    return params;
+    return const CalculationParameters(
+      method: CalculationMethod.moonsightingCommittee,
+      fajrAngle: 18,
+      ishaAngle: 18,
+      methodAdjustments: {
+        Prayer.fajr: 0,
+        Prayer.sunrise: 0,
+        Prayer.dhuhr: 5,
+        Prayer.asr: 0,
+        Prayer.maghrib: 3,
+        Prayer.isha: 0,
+      },
+    );
   }
 
   // Moroccan ministry of Habous and Islamic Affairs
   static CalculationParameters morocco() {
-    CalculationParameters params = CalculationParameters(
-        method: CalculationMethod.morocco, fajrAngle: 19, ishaAngle: 17);
-    params.methodAdjustments = {
-      Prayer.sunrise: -3,
-      Prayer.dhuhr: 5,
-      Prayer.maghrib: 5
-    };
-    return params;
+    return const CalculationParameters(
+      method: CalculationMethod.morocco,
+      fajrAngle: 19,
+      ishaAngle: 17,
+      methodAdjustments: {
+        Prayer.fajr: 0,
+        Prayer.sunrise: -3,
+        Prayer.dhuhr: 5,
+        Prayer.asr: 0,
+        Prayer.maghrib: 5,
+        Prayer.isha: 0,
+      },
+    );
   }
 
   // Muslim World League
   static CalculationParameters muslimWorldLeague() {
-    CalculationParameters params = CalculationParameters(
-        method: CalculationMethod.muslimWorldLeague,
-        fajrAngle: 18,
-        ishaAngle: 17);
-    params.methodAdjustments = {Prayer.dhuhr: 1};
-    return params;
+    return const CalculationParameters(
+      method: CalculationMethod.muslimWorldLeague,
+      fajrAngle: 18,
+      ishaAngle: 17,
+      methodAdjustments: {
+        Prayer.fajr: 0,
+        Prayer.sunrise: 0,
+        Prayer.dhuhr: 1,
+        Prayer.asr: 0,
+        Prayer.maghrib: 0,
+        Prayer.isha: 0,
+      },
+    );
   }
 
   // ISNA
   static CalculationParameters northAmerica() {
-    CalculationParameters params = CalculationParameters(
-        method: CalculationMethod.northAmerica, fajrAngle: 15, ishaAngle: 15);
-    params.methodAdjustments = {Prayer.dhuhr: 1};
-    return params;
+    return const CalculationParameters(
+      method: CalculationMethod.northAmerica,
+      fajrAngle: 15,
+      ishaAngle: 15,
+      methodAdjustments: {
+        Prayer.fajr: 0,
+        Prayer.sunrise: 0,
+        Prayer.dhuhr: 1,
+        Prayer.asr: 0,
+        Prayer.maghrib: 0,
+        Prayer.isha: 0,
+      },
+    );
   }
 
   // Other
   static CalculationParameters other() {
-    return CalculationParameters(
+    return const CalculationParameters(
         method: CalculationMethod.other, fajrAngle: 0, ishaAngle: 0);
   }
 
   // Qatar
   static CalculationParameters qatar() {
-    return CalculationParameters(
+    return const CalculationParameters(
         method: CalculationMethod.qatar,
         fajrAngle: 18,
         ishaAngle: 0,
@@ -111,15 +161,24 @@ class CalculationMethodParameters {
 
   // Singapore
   static CalculationParameters singapore() {
-    CalculationParameters params = CalculationParameters(
-        method: CalculationMethod.singapore, fajrAngle: 20, ishaAngle: 18);
-    params.methodAdjustments = {Prayer.dhuhr: 1};
-    return params;
+    return const CalculationParameters(
+      method: CalculationMethod.singapore,
+      fajrAngle: 20,
+      ishaAngle: 18,
+      methodAdjustments: {
+        Prayer.fajr: 0,
+        Prayer.sunrise: 0,
+        Prayer.dhuhr: 1,
+        Prayer.asr: 0,
+        Prayer.maghrib: 0,
+        Prayer.isha: 0,
+      },
+    );
   }
 
   // Institute of Geophysics, University of Tehran
   static CalculationParameters tehran() {
-    CalculationParameters params = CalculationParameters(
+    CalculationParameters params = const CalculationParameters(
         method: CalculationMethod.tehran,
         fajrAngle: 17.7,
         ishaAngle: 14,
@@ -130,20 +189,24 @@ class CalculationMethodParameters {
 
   // Dianet
   static CalculationParameters turkiye() {
-    CalculationParameters params = CalculationParameters(
-        method: CalculationMethod.turkiye, fajrAngle: 18, ishaAngle: 17);
-    params.methodAdjustments = {
-      Prayer.sunrise: -7,
-      Prayer.dhuhr: 5,
-      Prayer.asr: 4,
-      Prayer.maghrib: 7
-    };
-    return params;
+    return const CalculationParameters(
+      method: CalculationMethod.turkiye,
+      fajrAngle: 18,
+      ishaAngle: 17,
+      methodAdjustments: {
+        Prayer.fajr: 0,
+        Prayer.sunrise: -7,
+        Prayer.dhuhr: 5,
+        Prayer.asr: 4,
+        Prayer.maghrib: 7,
+        Prayer.isha: 0,
+      },
+    );
   }
 
   // Umm al-Qura University, Makkah
   static CalculationParameters ummAlQura() {
-    return CalculationParameters(
+    return const CalculationParameters(
         method: CalculationMethod.ummAlQura,
         fajrAngle: 18.5,
         ishaAngle: 0,

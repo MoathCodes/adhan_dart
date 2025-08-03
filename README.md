@@ -6,13 +6,66 @@ Adhan Dart is a well tested and well documented library for calculating Islamic 
 
 All astronomical calculations are high precision equations directly from the book [“Astronomical Algorithms” by Jean Meeus](https://www.willbell.com/math/mc1.htm). This book is recommended by the Astronomical Applications Department of the U.S. Naval Observatory and the Earth System Research Laboratory of the National Oceanic and Atmospheric Administration.
 
-Implementations of Adhan (JavaScript only for now) in other languages can be found in the original repo [Adhan](https://github.com/batoulapps/Adhan).
+# adhan_dart
 
-## Another Adhan package?
+Idiomatic Dart port of the excellent [Adhan](https://github.com/batoulapps/Adhan) prayer-times library.
 
-There are other 'adhan' packages available in this repository. This one is like-for-like port of tried and tested JS repo mentioned above. Several aspects are adjusted to take advantage of Dart's features and some functionality added in the process. For example, `prayerTimes.currentPrayer()` will not return null in case the time is after midnight and before fajr; rather it will return 'ishabefore', isha prayer of the day before. Likewise `prayerTimes.nextPrayer()` will return 'fajrafter' - meaning fajr prayer for the day after.
+**Whats Different in this branch (BREAKING)**
 
-Another addition is 'precise: true' parameter for prayer calculations. On absence of this parameter, the time returned will be rounded to the nearest minute; having precision as a parameter will return second-precision DateTime value. For example: `PrayerTimes prayerTimes = PrayerTimes(coordinates, date, params, precision: true);`.
+*   A completely immutable API – calculations are performed via
+    `PrayerTimesCalculator` which returns a `PrayerTimesData` value object.
+*   Legacy mutable `PrayerTimes` class still exist and works just fine.
+
+---
+
+## Quick-start
+
+```dart
+import 'package:adhan_dart/adhan_dart.dart';
+
+void main() {
+  // Coordinates for Makkah
+  const coords = Coordinates(21.3891, 39.8579);
+  final params = CalculationMethodParameters.ummAlQura();
+
+  // Calculate prayer times for today
+  final prayerTimes = PrayerTimesData.calculate(
+    date: DateTime.now(),
+    coordinates: coords,
+    calculationParameters: params,
+    precision: true, // Optional: for second-level precision
+  );
+
+  print('Fajr    : ${prayerTimes.fajr}');
+  print('Sunrise : ${prayerTimes.sunrise}');
+  print('Dhuhr   : ${prayerTimes.dhuhr}');
+  print('Asr     : ${prayerTimes.asr}');
+  print('Maghrib : ${prayerTimes.maghrib}');
+  print('Isha    : ${prayerTimes.isha}');
+
+  // Convenience utilities
+  final current = prayerTimes.currentPrayer();
+  final next = prayerTimes.nextPrayer();
+  final nextPrayerTime = prayerTimes.timeForPrayer(next);
+  print('Current prayer: $current');
+  if (nextPrayerTime != null) {
+    print('Next prayer: $next at $nextPrayerTime');
+  }
+
+  // Sunnah times
+  final sunnah = SunnahTimes(prayerTimes);
+  print('Middle of night: ${sunnah.middleOfTheNight}');
+  print('Last third of night: ${sunnah.lastThirdOfTheNight}');
+
+  // Qibla direction
+  final qibla = Qibla.qibla(coords);
+  print('Qibla direction: ${qibla.toStringAsFixed(2)}°');
+}
+```
+
+
+
+---
 
 ## Installation
 
@@ -40,11 +93,15 @@ import 'package:adhan_dart/adhan_dart.dart';
 
 ## Usage
 
-To get prayer times initialize a new `PrayerTimes` object passing in coordinates,
-date, and calculation parameters.
+To get prayer times, use the static `calculate` method on `PrayerTimesData` passing in a date, coordinates, and calculation parameters.
 
 ```dart
-PrayerTimes prayerTimes = PrayerTimes(coordinates: coordinates, date: date, calculationParameters: params, precision: true);
+final prayerTimes = PrayerTimesData.calculate(
+    date: DateTime.now(),
+    coordinates: coordinates,
+    calculationParameters: params,
+    precision: true, // Optional: for second-level precision
+);
 ```
 
 ### Initialization parameters
@@ -141,45 +198,71 @@ tz.TZDateTime.from(prayerTimes.fajr, timezone);
 ### Full Example
 
 ```dart
-DateTime date = tz.TZDateTime.from(DateTime.now(), timezone);
-final timezone = tz.getLocation('America/New_York');
-Coordinates coordinates = Coordinates(35.78056, -78.6389);
-CalculationParameters params = CalculationMethod.MuslimWorldLeague();
-params.madhab = Madhab.Hanafi;
-PrayerTimes prayerTimes = PrayerTimes(coordinates: coordinates, date: date, calculationParameters: params, precision: true);
+import 'package:adhan_dart/adhan_dart.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
-DateTime fajrTime = tz.TZDateTime.from(prayerTimes.fajr, timezone);
-DateTime sunriseTime = tz.TZDateTime.from(prayerTimes.sunrise, timezone);
-DateTime dhuhrTime = tz.TZDateTime.from(prayerTimes.dhuhr, timezone);
-DateTime asrTime = tz.TZDateTime.from(prayerTimes.asr, timezone);
-DateTime maghribTime = tz.TZDateTime.from(prayerTimes.maghrib, timezone);
-DateTime ishaTime = tz.TZDateTime.from(prayerTimes.isha, timezone);
+void main() {
+  tz.initializeTimeZones();
+  final location = tz.getLocation('America/New_York');
+  final date = tz.TZDateTime.from(DateTime.now(), location);
+  final coordinates = Coordinates(35.78056, -78.6389);
+  final params = CalculationMethod.muslimWorldLeague();
+  params.madhab = Madhab.hanafi;
+
+  final prayerTimes = PrayerTimesData.calculate(
+    date: date,
+    coordinates: coordinates,
+    calculationParameters: params,
+    precision: true,
+  );
+
+  final fajrTime = tz.TZDateTime.from(prayerTimes.fajr, location);
+  final sunriseTime = tz.TZDateTime.from(prayerTimes.sunrise, location);
+  final dhuhrTime = tz.TZDateTime.from(prayerTimes.dhuhr, location);
+  final asrTime = tz.TZDateTime.from(prayerTimes.asr, location);
+  final maghribTime = tz.TZDateTime.from(prayerTimes.maghrib, location);
+  final ishaTime = tz.TZDateTime.from(prayerTimes.isha, location);
+
+  print('Fajr:    $fajrTime');
+  print('Sunrise: $sunriseTime');
+  print('Dhuhr:   $dhuhrTime');
+  print('Asr:     $asrTime');
+  print('Maghrib: $maghribTime');
+  print('Isha:    $ishaTime');
+}
 ```
 
 ### Convenience Utilities
 
-The `PrayerTimes` object has functions for getting the current prayer and the next prayer. You can also get the time for a specified prayer, making it
+The `PrayerTimesData` object has functions for getting the current prayer and the next prayer. You can also get the time for a specified prayer, making it
 easier to dynamically show countdowns until the next prayer.
 
 ```dart
-var prayerTimes = PrayerTimes(coordinates: coordinates, date: date, calculationParameters: params, precision: true)
+final prayerTimes = PrayerTimesData.calculate(
+    date: DateTime.now(),
+    coordinates: coordinates,
+    calculationParameters: params,
+);
 
-var current = prayerTimes.currentPrayer();
-var next = prayerTimes.nextPrayer();
-var nextPrayerTime = prayerTimes.timeForPrayer(next);
+final current = prayerTimes.currentPrayer();
+final next = prayerTimes.nextPrayer();
+final nextPrayerTime = prayerTimes.timeForPrayer(next);
 ```
 
 ### Sunnah Times
 
-The Adhan library can also calulate Sunnah times. Given an instance of `PrayerTimes`, you can get a `SunnahTimes` object with the times for Qiyam.
+The Adhan library can also calculate Sunnah times. Given an instance of `PrayerTimesData`, you can get a `SunnahTimes` object with the times for Qiyam.
 
 ```dart
-final timezone = tz.getLocation('America/New_York');
-SunnahTimes sunnahTimes = SunnahTimes(prayerTimes);
-DateTime middleOfTheNight =
-    tz.TZDateTime.from(sunnahTimes.middleOfTheNight, timezone);
-DateTime lastThirdOfTheNight =
-    tz.TZDateTime.from(sunnahTimes.lastThirdOfTheNight, timezone);
+final prayerTimes = PrayerTimesData.calculate(
+    date: DateTime.now(),
+    coordinates: coordinates,
+    calculationParameters: params,
+);
+final sunnahTimes = SunnahTimes(prayerTimes);
+final middleOfTheNight = sunnahTimes.middleOfTheNight;
+final lastThirdOfTheNight = sunnahTimes.lastThirdOfTheNight;
 ```
 
 ### Qibla Direction

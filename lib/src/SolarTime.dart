@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:adhan_dart/src/Astronomical.dart';
-import 'package:adhan_dart/src/MathUtils.dart';
+import 'package:adhan_dart/src/extensions.dart';
 import 'package:adhan_dart/src/SolarCoordinates.dart';
 import 'package:adhan_dart/src/Coordinates.dart';
 

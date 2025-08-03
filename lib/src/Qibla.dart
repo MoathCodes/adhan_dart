@@ -1,7 +1,8 @@
 import 'dart:math';
 
 import 'package:adhan_dart/src/Coordinates.dart';
-import 'package:adhan_dart/src/MathUtils.dart';
+import 'package:adhan_dart/src/extensions.dart';
+
 
 /// A class used to calculate the Qibla direction
 /// returns an angle in degrees that you could place as a mark

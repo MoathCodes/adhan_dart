@@ -16,8 +16,7 @@ void main() {
   DateTime date = tz.TZDateTime.from(DateTime.now(), location);
   // set the time of date to 11:45 PM
 
-  final yesterday = date
-      .copyWith(hour: 23, minute: 00, second: 0)
+  final yesterday = DateTime(date.year, date.month, date.day, 23, 0, 0)
       .subtract(const Duration(days: 1));
 
   // current time in readable format
@@ -33,13 +32,13 @@ void main() {
   CalculationParameters params = CalculationMethodParameters.ummAlQura();
   // params.madhab = Madhab.shafi;
   // params.highLatitudeRule = HighLatitudeRule.seventhOfTheNight;
-  PrayerTimes prayerTimes = PrayerTimes(
-      coordinates: coordinates,
+  final prayerTimes = const PrayerTimesCalculator().calculate(
       date: date,
-      calculationParameters: params,
+      coordinates: coordinates,
+      params: params,
       precision: true);
 
-  SunnahTimes sunnahTimes = SunnahTimes(prayerTimes);
+  final sunnahTimes = SunnahTimes(prayerTimes);
 
   print(prayerTimes.currentPrayer(date: date));
   print(prayerTimes.nextPrayer(date: yesterday));
