@@ -1,5 +1,4 @@
-import 'package:adhan_dart/src/DateUtils.dart';
-import 'package:adhan_dart/src/PrayerTimes.dart';
+import 'package:adhan_dart/adhan_dart.dart';
 
 
 class SunnahTimes {
@@ -7,24 +6,25 @@ class SunnahTimes {
   late DateTime lastThirdOfTheNight;
 
   SunnahTimes(PrayerTimes prayerTimes, {bool precision = true}) {
-    DateTime date = prayerTimes.date;
-    DateTime nextDay = dateByAddingDays(date, 1);
-    PrayerTimes nextDayPrayerTimes = PrayerTimes(
-        coordinates: prayerTimes.coordinates,
-        date: nextDay,
-        calculationParameters: prayerTimes.calculationParameters,
-        precision: precision);
+    final DateTime nextDay = prayerTimes.date.addDays(1);
 
-    Duration nightDuration =
-        (nextDayPrayerTimes.fajr.difference(prayerTimes.maghrib));
+    // Use legacy constructor for now; will switch to immutable calculator later.
+    final PrayerTimes nextDayPrayerTimes = PrayerTimes(
+      coordinates: prayerTimes.coordinates,
+      date: nextDay,
+      calculationParameters: prayerTimes.calculationParameters,
+      precision: precision,
+    );
 
-    middleOfTheNight = roundedMinute(
-        dateByAddingSeconds(
-            prayerTimes.maghrib, (nightDuration.inSeconds / 2).floor()),
-        precision: precision);
-    lastThirdOfTheNight = roundedMinute(
-        dateByAddingSeconds(
-            prayerTimes.maghrib, (nightDuration.inSeconds * (2 / 3)).floor()),
-        precision: precision);
+    final Duration nightDuration =
+        nextDayPrayerTimes.fajr.difference(prayerTimes.maghrib);
+
+    middleOfTheNight = prayerTimes.maghrib
+        .addSeconds((nightDuration.inSeconds / 2).floor())
+        .roundedMinute(precision: precision);
+
+    lastThirdOfTheNight = prayerTimes.maghrib
+        .addSeconds((nightDuration.inSeconds * (2 / 3)).floor())
+        .roundedMinute(precision: precision);
   }
 }
