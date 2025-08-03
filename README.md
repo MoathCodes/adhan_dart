@@ -10,11 +10,91 @@ All astronomical calculations are high precision equations directly from the boo
 
 Idiomatic Dart port of the excellent [Adhan](https://github.com/batoulapps/Adhan) prayer-times library.
 
-**Whats Different in this branch (BREAKING)**
+**What's Different in this branch**
 
-*   A completely immutable API – calculations are performed via
-    `PrayerTimesCalculator` which returns a `PrayerTimesData` value object.
-*   Legacy mutable `PrayerTimes` class still exist and works just fine.
+* **🚀 New Immutable API** – Introduced `PrayerTimesData.calculate()` for modern, functional prayer time calculations
+  ```dart
+  // Simple one-liner calculation
+  final prayerTimes = PrayerTimesData.calculate(
+    date: DateTime.now(),
+    coordinates: coords,
+    calculationParameters: params,
+  );
+  ```
+* **🔄 Full Backward Compatibility** – Your existing code continues to work! Legacy `PrayerTimes` class is fully functional
+* **🛡️ Enhanced Type Safety**:
+  - Immutable data structures (`@immutable` classes)
+  - Better null safety with non-nullable convenience methods
+  - Const constructors for compile-time optimizations
+* **📊 Comprehensive Testing**:
+  - New 310-line API validation test suite comparing against Aladhan API
+  - Real-world validation across multiple cities and calculation methods
+  - Updated all existing test files for new patterns
+* **⚡ Performance Improvements**:
+  - Optimized calculation algorithms
+  - Better memory usage with immutable objects
+  - Reduced object creation overhead
+* **🔧 Developer Experience**:
+  - Cleaner static factory method: `PrayerTimesData.calculate()`
+  - Enhanced `copyWith()` method for `CalculationParameters`
+  - Better IDE support with improved type inference
+  - Consolidated utility extensions in `DateTime` and other types
+* **📦 Updated Dependencies**:
+  - Added `meta: ^1.17.0` for immutability annotations
+  - Added `test: ^1.26.3` for enhanced testing capabilities
+* **🧹 Code Quality**:
+  - Removed redundant utility files (`DateUtils.dart`, `MathUtils.dart`)
+  - Moved utilities to idiomatic Dart extensions
+  - Separation of concerns: calculation logic vs data representation
+  - Modern Dart patterns throughout (const constructors, extensions, etc.)
+
+## Migration Guide
+
+### Old API (Still Works! ✅)
+```dart
+// Master branch - mutable, constructor-based approach
+CalculationParameters params = CalculationMethodParameters.muslimWorldLeague()
+  ..madhab = Madhab.hanafi;  // Mutable modification
+
+PrayerTimes prayerTimes = PrayerTimes(
+  coordinates: coordinates,
+  date: date,
+  calculationParameters: params,
+  precision: true
+);
+```
+
+### New API 
+```dart
+// Refactor branch - immutable, functional approach
+final params = CalculationMethodParameters.muslimWorldLeague()
+    .copyWith(madhab: Madhab.hanafi);  // Immutable copyWith()
+
+final prayerTimes = PrayerTimesData.calculate(
+  date: date,
+  coordinates: coordinates,
+  calculationParameters: params,
+  precision: true,
+);
+
+// Or even simpler with the static factory:
+final prayerTimes = PrayerTimesData.calculate(
+  date: DateTime.now(),
+  coordinates: coordinates,
+  calculationParameters: params,
+);
+```
+
+### Key Differences
+| Aspect | Old API | New API |
+|--------|---------|---------|
+| **Style** | Constructor-based | Static factory method |
+| **Mutability** | Mutable params (`..madhab = `) | Immutable (`copyWith()`) |
+| **Type Safety** | Runtime modifications | Compile-time safety |
+| **Memory** | Mutable objects | Immutable, cacheable |
+| **Testing** | Harder to test state | Predictable, pure functions |
+
+Both APIs return the same prayer time data and work identically for accessing times, utilities, and Sunnah calculations!
 
 ---
 
