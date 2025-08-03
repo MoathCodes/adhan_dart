@@ -8,17 +8,20 @@
 import 'dart:math' as math;
 
 extension DateTimeExtensions on DateTime {
+  /// Returns the day of year (1-based).
+  int get dayOfYear {
+    final first = DateTime(year, 1, 1);
+    return difference(first).inDays + 1;
+  }
+
   /// Adds [days] days and returns a new `DateTime`.
   DateTime addDays(int days) => add(Duration(days: days));
 
   /// Adds [seconds] seconds and returns a new `DateTime`.
   DateTime addSeconds(int seconds) => add(Duration(seconds: seconds));
 
-  /// Returns the day of year (1-based).
-  int get dayOfYear {
-    final first = DateTime(year, 1, 1);
-    return difference(first).inDays + 1;
-  }
+  /// Adds [minutes] minutes and returns a new `DateTime`.
+  DateTime addMinutes(int minutes) => add(Duration(minutes: minutes));
 
   /// Rounds to nearest minute unless [precision] is true, in which case the
   /// original instance is returned.
@@ -30,19 +33,19 @@ extension DateTimeExtensions on DateTime {
   }
 }
 
-extension NumAngleExtensions on num {
-  /// Converts degrees to radians.
-  double get toRadians => (this * math.pi) / 180.0;
-
+extension NumAngleExtensions on double {
   /// Converts radians to degrees.
   double get toDegrees => (this * 180.0) / math.pi;
 
-  /// Normalises an angle to a [0,360) scale.
-  double unwind() => this - (360 * (this / 360).floor());
+  /// Converts degrees to radians.
+  double get toRadians => (this * math.pi) / 180.0;
 
   /// Shifts an angle into the (-180,180] range.
   double quadrantShift() {
     if (this >= -180 && this <= 180) return toDouble();
     return this - (360 * (this / 360).round());
   }
+
+  /// Normalises an angle to a [0,360) scale.
+  double unwind() => this - (360 * (this / 360).floor());
 }
