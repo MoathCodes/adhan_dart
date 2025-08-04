@@ -1,0 +1,13 @@
+name: adhan_benchmark_comparison
+description: Benchmark comparison between pub.dev and local versions
+version: 1.0.0
+
+environment:
+  sdk: '>=2.17.0 <4.0.0'
+
+dependencies:
+  # This will be switched between pub.dev and local versions
+  adhan_dart: ^1.1.2
+
+dev_dependencies:
+  test: ^1.26.3

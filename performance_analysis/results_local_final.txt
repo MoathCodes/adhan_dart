@@ -1,0 +1,27 @@
+🧪 LOCAL VERSION BENCHMARK
+📅 Date: 2025-08-04 03:02:46.827086
+🖥️  Platform: linux
+📦 Version: Using local enhanced adhan_dart
+
+1️⃣ Basic Prayer Time Calculation Test (New API)
+   🎯 Running 500 iterations...
+   ⏱️  Average time: 113.2μs per calculation
+   🎯 Total time: 56ms
+   📈 Throughput: 8929 calculations/second
+
+2️⃣ Repeated Calculations Test (Same Parameters) - CACHING ACTIVE
+   ⏱️  Average time: 43.4μs per calculation
+   🎯 Total time: 4ms
+   🚀 Caching optimizations active in local version
+
+3️⃣ Memory Usage Test
+   📦 Created 1000 objects in 29ms
+   ⏱️  Average creation time: 59.1μs per object
+   🛡️  Objects use immutable state (local version)
+4️⃣ Coordinate Validation Test
+   🔧 Regular coordinates: 565μs total
+   🛡️  Validated coordinates: 2121μs total
+   📈 Validation overhead: 275.4%
+
+✅ LOCAL VERSION BENCHMARK COMPLETED
+

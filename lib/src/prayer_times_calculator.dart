@@ -1,10 +1,7 @@
 import 'package:adhan_dart/adhan_dart.dart';
-
 import 'package:adhan_dart/src/Astronomical.dart';
 import 'package:adhan_dart/src/SolarTime.dart';
 import 'package:adhan_dart/src/TimeComponents.dart';
-
-
 
 /// Temporary bridge calculator that produces an immutable [PrayerTimesData]
 /// object while still delegating the heavy lifting to the legacy
@@ -32,8 +29,10 @@ class PrayerTimesCalculator {
     final solarBefore = SolarTime(dateBefore, coordinates);
     final solarAfter = SolarTime(dateAfter, coordinates);
 
-    DateTime asrTime = TimeComponents(
-            solarToday.afternoon(shadowLength(params.madhab)))
+    // Pre-calculate shadow length to avoid redundant calls
+    final shadowLengthValue = shadowLength(params.madhab);
+
+    DateTime asrTime = TimeComponents(solarToday.afternoon(shadowLengthValue))
         .utcDate(date.year, date.month, date.day);
 
     // sunrise & sunset
@@ -43,12 +42,12 @@ class PrayerTimesCalculator {
         .utcDate(date.year, date.month, date.day);
 
     // fajr & fajrAfter (tomorrow)
-    DateTime fajrTime = TimeComponents(
-            solarToday.hourAngle(-1 * params.fajrAngle, false))
-        .utcDate(date.year, date.month, date.day);
-    DateTime fajrAfterTime = TimeComponents(
-            solarAfter.hourAngle(-1 * params.fajrAngle, false))
-        .utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
+    DateTime fajrTime =
+        TimeComponents(solarToday.hourAngle(-1 * params.fajrAngle, false))
+            .utcDate(date.year, date.month, date.day);
+    DateTime fajrAfterTime =
+        TimeComponents(solarAfter.hourAngle(-1 * params.fajrAngle, false))
+            .utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
 
     // dhuhr
     final DateTime dhuhrTime = TimeComponents(solarToday.transit)
@@ -67,12 +66,12 @@ class PrayerTimesCalculator {
     final DateTime maghribTime = sunsetTime;
 
     // Isha & IshabeforeTime
-    DateTime ishaTime = TimeComponents(
-            solarToday.hourAngle(-1 * params.ishaAngle, true))
-        .utcDate(date.year, date.month, date.day);
-    DateTime ishaBeforeTime = TimeComponents(
-            solarBefore.hourAngle(-1 * params.ishaAngle, true))
-        .utcDate(dateBefore.year, dateBefore.month, dateBefore.day);
+    DateTime ishaTime =
+        TimeComponents(solarToday.hourAngle(-1 * params.ishaAngle, true))
+            .utcDate(date.year, date.month, date.day);
+    DateTime ishaBeforeTime =
+        TimeComponents(solarBefore.hourAngle(-1 * params.ishaAngle, true))
+            .utcDate(dateBefore.year, dateBefore.month, dateBefore.day);
 
     // High latitude adjustments (safeFajr/Isha logic)
     DateTime safeFajr() {
@@ -123,10 +122,12 @@ class PrayerTimesCalculator {
       coordinates: coordinates,
       params: params,
       fajr: precision ? fajrTime : fajrTime.roundedMinute(precision: false),
-      sunrise: precision ? sunriseTime : sunriseTime.roundedMinute(precision: false),
+      sunrise:
+          precision ? sunriseTime : sunriseTime.roundedMinute(precision: false),
       dhuhr: precision ? dhuhrTime : dhuhrTime.roundedMinute(precision: false),
       asr: precision ? asrTime : asrTime.roundedMinute(precision: false),
-      maghrib: precision ? maghribTime : maghribTime.roundedMinute(precision: false),
+      maghrib:
+          precision ? maghribTime : maghribTime.roundedMinute(precision: false),
       isha: precision ? ishaTime : ishaTime.roundedMinute(precision: false),
       ishaBefore: ishaBeforeTime,
       fajrAfter: fajrAfterTime,

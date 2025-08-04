@@ -1,0 +1,22 @@
+🧪 PUB.DEV VERSION BENCHMARK
+📅 Date: 2025-08-04 03:08:48.723059
+🖥️  Platform: linux
+📦 Version: Using pub.dev adhan_dart ^1.1.2
+
+1️⃣ Basic Prayer Time Calculation Test
+   🎯 Running 500 iterations...
+   ⏱️  Average time: 184.1μs per calculation
+   🎯 Total time: 92ms
+   📈 Throughput: 5435 calculations/second
+
+2️⃣ Repeated Calculations Test (Same Parameters)
+   ⏱️  Average time: 69.0μs per calculation
+   🎯 Total time: 6ms
+   📊 No caching optimizations expected in pub.dev version
+
+3️⃣ Memory Usage Test
+   📦 Created 1000 objects in 33ms
+   ⏱️  Average creation time: 67.0μs per object
+   🧠 Objects use mutable state (pub.dev version)
+✅ PUB.DEV VERSION BENCHMARK COMPLETED
+

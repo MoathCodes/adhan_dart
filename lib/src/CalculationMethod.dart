@@ -1,5 +1,6 @@
 import 'package:adhan_dart/adhan_dart.dart';
 
+/// Enum holding all the available methods
 enum CalculationMethod {
   dubai,
   egyptian,
@@ -17,9 +18,14 @@ enum CalculationMethod {
   ummAlQura;
 }
 
-/// Various calculation methods
+/// Class holding the calculation parameters for each method
 class CalculationMethodParameters {
-  // Dubai
+  /// Dubai
+  ///
+  /// Settings:
+  /// - Fajr Angle: 18.2°
+  /// - Isha Angle: 18.2°
+  /// - Method Adjustments: Sunrise -3min, Dhuhr +3min, Asr +3min, Maghrib +3min
   static CalculationParameters dubai() {
     return const CalculationParameters(
       method: CalculationMethod.dubai,
@@ -36,7 +42,12 @@ class CalculationMethodParameters {
     );
   }
 
-  // Egyptian General Authority of Survey
+  /// Egyptian General Authority of Survey
+  ///
+  /// Settings:
+  /// - Fajr Angle: 19.5°
+  /// - Isha Angle: 17.5°
+  /// - Method Adjustments: Dhuhr +1min
   static CalculationParameters egyptian() {
     return const CalculationParameters(
       method: CalculationMethod.egyptian,
@@ -53,7 +64,12 @@ class CalculationMethodParameters {
     );
   }
 
-  // University of Islamic Sciences, Karachi
+  /// University of Islamic Sciences, Karachi
+  ///
+  /// Settings:
+  /// - Fajr Angle: 18°
+  /// - Isha Angle: 18°
+  /// - Method Adjustments: Dhuhr +1min
   static CalculationParameters karachi() {
     return const CalculationParameters(
       method: CalculationMethod.karachi,
@@ -70,13 +86,22 @@ class CalculationMethodParameters {
     );
   }
 
-  // Kuwait
+  /// Kuwait
+  ///
+  /// Settings:
+  /// - Fajr Angle: 18°
+  /// - Isha Angle: 17.5°
   static CalculationParameters kuwait() {
     return const CalculationParameters(
         method: CalculationMethod.kuwait, fajrAngle: 18, ishaAngle: 17.5);
   }
 
-  // Moonsighting Committee
+  /// Moonsighting Committee
+  ///
+  /// Settings:
+  /// - Fajr Angle: 18°
+  /// - Isha Angle: 18°
+  /// - Method Adjustments: Dhuhr +5min, Maghrib +3min
   static CalculationParameters moonsightingCommittee() {
     return const CalculationParameters(
       method: CalculationMethod.moonsightingCommittee,
@@ -93,7 +118,12 @@ class CalculationMethodParameters {
     );
   }
 
-  // Moroccan ministry of Habous and Islamic Affairs
+  /// Morocco
+  ///
+  /// Settings:
+  /// - Fajr Angle: 19°
+  /// - Isha Angle: 17°
+  /// - Method Adjustments: Sunrise -3min, Dhuhr +5min, Maghrib +5min
   static CalculationParameters morocco() {
     return const CalculationParameters(
       method: CalculationMethod.morocco,
@@ -110,7 +140,12 @@ class CalculationMethodParameters {
     );
   }
 
-  // Muslim World League
+  /// Muslim World League
+  ///
+  /// Settings:
+  /// - Fajr Angle: 18°
+  /// - Isha Angle: 17°
+  /// - Method Adjustments: Dhuhr +1min
   static CalculationParameters muslimWorldLeague() {
     return const CalculationParameters(
       method: CalculationMethod.muslimWorldLeague,
@@ -127,7 +162,12 @@ class CalculationMethodParameters {
     );
   }
 
-  // ISNA
+  /// North America (ISNA)
+  ///
+  /// Settings:
+  /// - Fajr Angle: 15°
+  /// - Isha Angle: 15°
+  /// - Method Adjustments: Dhuhr +1min
   static CalculationParameters northAmerica() {
     return const CalculationParameters(
       method: CalculationMethod.northAmerica,
@@ -144,13 +184,21 @@ class CalculationMethodParameters {
     );
   }
 
-  // Other
+  /// Other (Custom)
+  ///
+  /// Settings:
+  /// - Fajr Angle: 0°
+  /// - Isha Angle: 0°
   static CalculationParameters other() {
     return const CalculationParameters(
         method: CalculationMethod.other, fajrAngle: 0, ishaAngle: 0);
   }
 
-  // Qatar
+  /// Qatar
+  ///
+  /// Settings:
+  /// - Fajr Angle: 18°
+  /// - Isha Interval: 90 minutes after Maghrib
   static CalculationParameters qatar() {
     return const CalculationParameters(
         method: CalculationMethod.qatar,
@@ -159,7 +207,12 @@ class CalculationMethodParameters {
         ishaInterval: 90);
   }
 
-  // Singapore
+  /// Singapore
+  ///
+  /// Settings:
+  /// - Fajr Angle: 20°
+  /// - Isha Angle: 18°
+  /// - Method Adjustments: Dhuhr +1min
   static CalculationParameters singapore() {
     return const CalculationParameters(
       method: CalculationMethod.singapore,
@@ -176,7 +229,13 @@ class CalculationMethodParameters {
     );
   }
 
-  // Institute of Geophysics, University of Tehran
+  /// Tehran
+  ///
+  /// Settings:
+  /// - Fajr Angle: 17.7°
+  /// - Isha Angle: 14°
+  /// - Maghrib Angle: 4.5°
+  /// - Isha Interval: 0 (not used)
   static CalculationParameters tehran() {
     CalculationParameters params = const CalculationParameters(
         method: CalculationMethod.tehran,
@@ -187,7 +246,12 @@ class CalculationMethodParameters {
     return params;
   }
 
-  // Dianet
+  /// Turkey (Diyanet)
+  ///
+  /// Settings:
+  /// - Fajr Angle: 18°
+  /// - Isha Angle: 17°
+  /// - Method Adjustments: Sunrise -7min, Dhuhr +5min, Asr +4min, Maghrib +7min
   static CalculationParameters turkiye() {
     return const CalculationParameters(
       method: CalculationMethod.turkiye,
@@ -204,7 +268,13 @@ class CalculationMethodParameters {
     );
   }
 
-  // Umm al-Qura University, Makkah
+  /// Umm al-Qura University, Makkah
+  ///
+  /// Settings:
+  /// - Fajr Angle: 18.5°
+  /// - Isha Interval: 90 minutes after Maghrib
+  ///
+  /// Note: Add +30 minute custom adjustment for Isha during Ramadan
   static CalculationParameters ummAlQura() {
     return const CalculationParameters(
         method: CalculationMethod.ummAlQura,

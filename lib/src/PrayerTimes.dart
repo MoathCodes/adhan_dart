@@ -1,27 +1,50 @@
 import 'package:adhan_dart/adhan_dart.dart';
 import 'package:adhan_dart/src/Astronomical.dart';
-import 'package:adhan_dart/src/extensions.dart';
-
 import 'package:adhan_dart/src/SolarTime.dart';
 import 'package:adhan_dart/src/TimeComponents.dart';
 
+/// Prayer times calculation for a given date, location, and calculation method.
+///
+/// Contains all five daily prayer times plus sunrise, and additional times for
+/// previous day's Isha and next day's Fajr for convenience.
 class PrayerTimes {
   DateTime date = DateTime.now();
   Coordinates coordinates = const Coordinates(0, 0);
   CalculationParameters calculationParameters =
       CalculationMethodParameters.muslimWorldLeague();
 
+  /// Fajr prayer time
   late DateTime fajr;
+
+  /// Sunrise time
   late DateTime sunrise;
+
+  /// Dhuhr prayer time
   late DateTime dhuhr;
+
+  /// Asr prayer time
   late DateTime asr;
+
+  /// Maghrib prayer time
   late DateTime maghrib;
+
+  /// Isha prayer time
   late DateTime isha;
+
+  /// Previous day's Isha prayer time
   late DateTime ishaBefore;
+
+  /// Next day's Fajr prayer time
   late DateTime fajrAfter;
 
   // TODO: added precision
   // rounded nightfraction
+  /// Creates prayer times for the given date, coordinates, and calculation parameters.
+  ///
+  /// [date] - Date for which to calculate prayer times
+  /// [coordinates] - Geographic coordinates (latitude, longitude)
+  /// [calculationParameters] - Calculation method and adjustments
+  /// [precision] - If true, returns times with second precision; if false, rounds to nearest minute
   PrayerTimes({
     required DateTime date,
     required Coordinates coordinates,
@@ -86,8 +109,7 @@ class PrayerTimes {
         coordinates.latitude >= 55) {
       nightFraction = night / 7;
       fajrTime = sunriseTime.addSeconds(-nightFraction.round());
-      fajrafterTime =
-          sunriseafterTime.addSeconds(-nightFraction.round());
+      fajrafterTime = sunriseafterTime.addSeconds(-nightFraction.round());
     }
 
     DateTime safeFajr() {
@@ -126,7 +148,8 @@ class PrayerTimes {
     if (calculationParameters.ishaInterval != null &&
         calculationParameters.ishaInterval! > 0) {
       ishaTime = sunsetTime.addMinutes(calculationParameters.ishaInterval!);
-      ishabeforeTime = sunsetbeforeTime.addMinutes(calculationParameters.ishaInterval!);
+      ishabeforeTime =
+          sunsetbeforeTime.addMinutes(calculationParameters.ishaInterval!);
     } else {
       ishaTime = TimeComponents(
               solarTime.hourAngle(-1 * calculationParameters.ishaAngle, true))
@@ -140,8 +163,7 @@ class PrayerTimes {
           coordinates.latitude >= 55) {
         nightFraction = night / 7;
         ishaTime = sunsetTime.addSeconds(nightFraction!.round());
-        ishabeforeTime =
-            sunsetbeforeTime.addSeconds(nightFraction!.round());
+        ishabeforeTime = sunsetbeforeTime.addSeconds(nightFraction!.round());
       }
 
       DateTime safeIsha() {
@@ -207,15 +229,27 @@ class PrayerTimes {
     int ishaAdjustment = (calculationParameters.adjustments[Prayer.isha] ?? 0) +
         (calculationParameters.methodAdjustments[Prayer.isha] ?? 0);
 
-    fajr = fajrTime.addMinutes(fajrAdjustment).roundedMinute(precision: precision);
-    sunrise = sunriseTime.addMinutes(sunriseAdjustment).roundedMinute(precision: precision);
-    dhuhr = dhuhrTime.addMinutes(dhuhrAdjustment).roundedMinute(precision: precision);
+    fajr =
+        fajrTime.addMinutes(fajrAdjustment).roundedMinute(precision: precision);
+    sunrise = sunriseTime
+        .addMinutes(sunriseAdjustment)
+        .roundedMinute(precision: precision);
+    dhuhr = dhuhrTime
+        .addMinutes(dhuhrAdjustment)
+        .roundedMinute(precision: precision);
     asr = asrTime.addMinutes(asrAdjustment).roundedMinute(precision: precision);
-    maghrib = maghribTime.addMinutes(maghribAdjustment).roundedMinute(precision: precision);
-    isha = ishaTime.addMinutes(ishaAdjustment).roundedMinute(precision: precision);
+    maghrib = maghribTime
+        .addMinutes(maghribAdjustment)
+        .roundedMinute(precision: precision);
+    isha =
+        ishaTime.addMinutes(ishaAdjustment).roundedMinute(precision: precision);
 
-    fajrAfter = fajrafterTime.addMinutes(fajrAdjustment).roundedMinute(precision: precision);
-    ishaBefore = ishabeforeTime.addMinutes(ishaAdjustment).roundedMinute(precision: precision);
+    fajrAfter = fajrafterTime
+        .addMinutes(fajrAdjustment)
+        .roundedMinute(precision: precision);
+    ishaBefore = ishabeforeTime
+        .addMinutes(ishaAdjustment)
+        .roundedMinute(precision: precision);
   }
 
   Prayer currentPrayer({required DateTime date}) {

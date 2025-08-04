@@ -1,6 +1,10 @@
 import 'package:adhan_dart/adhan_dart.dart';
 import 'package:meta/meta.dart';
 
+/// Holds calculation parameters for prayer time calculations
+///
+/// Contains angles, intervals, adjustments, and other settings
+/// that define how prayer times are calculated for different methods.
 @immutable
 class CalculationParameters {
   final CalculationMethod method;
@@ -54,8 +58,8 @@ class CalculationParameters {
         method: method ?? this.method,
         fajrAngle: fajrAngle ?? this.fajrAngle,
         ishaAngle: ishaAngle ?? this.ishaAngle,
-
-        // maghribAngle: maghribAngle ?? this.maghribAngle,
+        ishaInterval: ishaInterval ?? this.ishaInterval,
+        maghribAngle: maghribAngle ?? this.maghribAngle,
         madhab: madhab ?? this.madhab,
         highLatitudeRule: highLatitudeRule ?? this.highLatitudeRule,
         adjustments: adjustments ?? this.adjustments,
@@ -70,8 +74,6 @@ class CalculationParameters {
         return {Prayer.fajr: 1 / 7, Prayer.isha: 1 / 7};
       case HighLatitudeRule.twilightAngle:
         return {Prayer.fajr: fajrAngle / 60, Prayer.isha: ishaAngle / 60};
-      default:
-        throw ('Invalid high latitude rule found when attempting to compute night portions: $highLatitudeRule');
     }
   }
 }
