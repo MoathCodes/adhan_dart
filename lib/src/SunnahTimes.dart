@@ -7,8 +7,8 @@ import 'package:adhan_dart/adhan_dart.dart';
 /// Example:
 /// ```dart
 /// final sunnahTimes = SunnahTimes(prayerTimes);
-/// // for precise times, set precision to true
-/// final sunnahTimes = SunnahTimes(prayerTimes, precision: true);
+/// // for precise times, set roundToMinutes to false
+/// final sunnahTimes = SunnahTimes(prayerTimes, roundToMinutes: false);
 /// print(sunnahTimes.middleOfTheNight);
 /// print(sunnahTimes.lastThirdOfTheNight);
 /// ```
@@ -22,33 +22,35 @@ class SunnahTimes {
   static CalculationParameters? _cachedParams;
   final DateTime middleOfTheNight;
   final DateTime lastThirdOfTheNight;
-  SunnahTimes(PrayerTimesData prayerTimes, {bool precision = true})
-      : middleOfTheNight = _calculateMiddleOfNight(prayerTimes, precision),
+  SunnahTimes(PrayerTimesData prayerTimes, {bool roundToMinutes = true})
+      : middleOfTheNight = _calculateMiddleOfNight(prayerTimes, roundToMinutes),
         lastThirdOfTheNight =
-            _calculateLastThirdOfNight(prayerTimes, precision);
+            _calculateLastThirdOfNight(prayerTimes, roundToMinutes);
 
   static DateTime _calculateLastThirdOfNight(
-      PrayerTimesData prayerTimes, bool precision) {
-    final nextDayPrayerTimes = _getNextDayPrayerTimes(prayerTimes, precision);
+      PrayerTimesData prayerTimes, bool roundToMinutes) {
+    final nextDayPrayerTimes =
+        _getNextDayPrayerTimes(prayerTimes, roundToMinutes);
     final Duration nightDuration =
         nextDayPrayerTimes.fajr.difference(prayerTimes.maghrib);
     return prayerTimes.maghrib
         .addSeconds((nightDuration.inSeconds * (2 / 3)).floor())
-        .roundedMinute(precision: precision);
+        .roundedMinute(precision: !roundToMinutes);
   }
 
   static DateTime _calculateMiddleOfNight(
-      PrayerTimesData prayerTimes, bool precision) {
-    final nextDayPrayerTimes = _getNextDayPrayerTimes(prayerTimes, precision);
+      PrayerTimesData prayerTimes, bool roundToMinutes) {
+    final nextDayPrayerTimes =
+        _getNextDayPrayerTimes(prayerTimes, roundToMinutes);
     final Duration nightDuration =
         nextDayPrayerTimes.fajr.difference(prayerTimes.maghrib);
     return prayerTimes.maghrib
         .addSeconds((nightDuration.inSeconds / 2).floor())
-        .roundedMinute(precision: precision);
+        .roundedMinute(precision: !roundToMinutes);
   }
 
   static PrayerTimesData _getNextDayPrayerTimes(
-      PrayerTimesData prayerTimes, bool precision) {
+      PrayerTimesData prayerTimes, bool roundToMinutes) {
     final nextDay = prayerTimes.date.addDays(1);
 
     // Simple cache check to avoid redundant calculations
@@ -63,7 +65,7 @@ class SunnahTimes {
       date: nextDay,
       coordinates: prayerTimes.coordinates,
       params: prayerTimes.params,
-      precision: precision,
+      roundToMinutes: roundToMinutes,
     );
 
     // Cache the result

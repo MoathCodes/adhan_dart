@@ -68,23 +68,23 @@ extension CalculationMethodParametersExtension on CalculationMethod {
 extension CoordinatesExtension on Coordinates {
   /// Calculate prayer times for a specific date using the specified method
   PrayerTimesData prayerTimesFor(DateTime date, CalculationMethod method,
-      {bool precision = false}) {
+      {bool roundToMinutes = true}) {
     return PrayerTimesData.calculate(
       date: date,
       coordinates: this,
       calculationParameters: method.parameters,
-      precision: precision,
+      roundToMinutes: roundToMinutes,
     );
   }
 
   /// Calculate prayer times for today using the specified method
   PrayerTimesData todaysPrayerTimes(CalculationMethod method,
-      {bool precision = false}) {
+      {bool roundToMinutes = true}) {
     return PrayerTimesData.calculate(
       date: DateTime.now(),
       coordinates: this,
       calculationParameters: method.parameters,
-      precision: precision,
+      roundToMinutes: roundToMinutes,
     );
   }
 }

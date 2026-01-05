@@ -4,7 +4,7 @@ import 'package:adhan_dart/adhan_dart.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-main() {
+void main() {
   tz.initializeTimeZones();
   final location = tz.getLocation('America/New_York');
 
@@ -19,7 +19,7 @@ main() {
       date: date,
       coordinates: coordinates,
       params: params,
-      precision: true);
+      roundToMinutes: true);
 
   // Prayer times
   DateTime fajrTime = tz.TZDateTime.from(prayerTimes.fajr, location);

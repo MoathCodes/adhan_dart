@@ -72,7 +72,7 @@ void main() {
     date: DateTime.now(),
     coordinates: coordinates,
     calculationParameters: CalculationMethodParameters.moonsightingCommittee(),
-    precision: true,
+    roundToMinutes: true,
   );
 
   print('   📍 Location: Raleigh, NC');
@@ -85,7 +85,7 @@ void main() {
 
   // 6. Optimized Sunnah times (avoids duplicate calculations)
   print('\n6. Optimized Sunnah times:');
-  final sunnahTimes = SunnahTimes(prayerTimes, precision: true);
+  final sunnahTimes = SunnahTimes(prayerTimes, roundToMinutes: true);
   print('   🌃 Middle of night: ${sunnahTimes.middleOfTheNight}');
   print('   ⭐ Last third of night: ${sunnahTimes.lastThirdOfTheNight}');
 

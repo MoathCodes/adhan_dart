@@ -30,7 +30,7 @@ void benchmarkBasicCalculations() {
       date: date,
       coordinates: coords,
       calculationParameters: params,
-      precision: true,
+      roundToMinutes: true,
     );
   }
 
@@ -151,7 +151,7 @@ void benchmarkSunnahTimesOptimization() {
   final results = <SunnahTimes>[];
 
   for (int i = 0; i < iterations; i++) {
-    results.add(SunnahTimes(prayerTimes, precision: true));
+    results.add(SunnahTimes(prayerTimes, roundToMinutes: true));
   }
 
   stopwatch.stop();

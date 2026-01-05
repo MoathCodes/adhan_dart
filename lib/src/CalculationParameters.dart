@@ -76,4 +76,9 @@ class CalculationParameters {
         return {Prayer.fajr: fajrAngle / 60, Prayer.isha: ishaAngle / 60};
     }
   }
+
+  @override
+  String toString() {
+    return 'CalculationParameters(method: $method, fajrAngle: $fajrAngle, ishaAngle: $ishaAngle, ishaInterval: $ishaInterval, maghribAngle: $maghribAngle, madhab: $madhab, highLatitudeRule: $highLatitudeRule, adjustments: $adjustments, methodAdjustments: $methodAdjustments)';
+  }
 }

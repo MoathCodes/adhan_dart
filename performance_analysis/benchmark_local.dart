@@ -14,7 +14,7 @@ void main() {
 void _runBenchmarks() {
   print('1️⃣ Basic Prayer Time Calculation Test (New API)');
   
-  final coords = Coordinates(21.3891, 39.8579); // Mecca
+  const coords = Coordinates(21.3891, 39.8579); // Mecca
   final date = DateTime(2024, 6, 15);
   final params = CalculationMethodParameters.ummAlQura();
   

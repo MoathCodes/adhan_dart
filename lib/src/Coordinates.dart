@@ -14,6 +14,10 @@ class Coordinates {
         assert(longitude >= -180 && longitude <= 180,
             'Longitude must be between -180 and 180 degrees');
 
+  factory Coordinates.fromJson(Map<String, dynamic> data) {
+    return Coordinates(data['latitude'], data['longitude']);
+  }
+
   /// Create coordinates with validation
   factory Coordinates.validated(double latitude, double longitude) {
     if (latitude < -90 || latitude > 90) {
@@ -59,4 +63,11 @@ class Coordinates {
   @override
   String toString() =>
       'Coordinates(latitude: $latitude, longitude: $longitude)';
+
+  static Map<String, dynamic> toJson(Coordinates coordinates) {
+    return {
+      'latitude': coordinates.latitude,
+      'longitude': coordinates.longitude
+    };
+  }
 }
