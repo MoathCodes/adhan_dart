@@ -1,24 +1,35 @@
 /// Dart extensions and utility functions for the adhan_dart library.
 /// Provides idiomatic Dart replacements for legacy JavaScript-style helpers.
-library extensions;
+library;
 
 import 'dart:math' as math;
 
 import 'package:adhan_dart/adhan_dart.dart';
 
 int dayOfYear(DateTime date) {
-  final diff = date.difference(DateTime(date.year, 1, 1, 0, 0));
-  return diff.inDays + 1; // 1st Jan should be day 1
+  final year = date.year;
+  final isLeapYear = (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
+  final daysInFeb = isLeapYear ? 29 : 28;
+  final months = [31, daysInFeb, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+  int dayOfYear = 0;
+  for (var i = 0; i < date.month - 1; i++) {
+    dayOfYear += months[i];
+  }
+  dayOfYear += date.day;
+  return dayOfYear;
 }
 
 // Mathematical utility functions
 double degreesToRadians(double degrees) => (degrees * math.pi) / 180.0;
 
 double normalizeToScale(double number, double max) {
+  if (number.isNaN) return double.nan;
   return number - (max * ((number / max).floor()));
 }
 
 double quadrantShiftAngle(double angle) {
+  if (angle.isNaN) return double.nan;
   if (angle >= -180 && angle <= 180) {
     return angle;
   }
@@ -29,61 +40,31 @@ double radiansToDegrees(double radians) => (radians * 180.0) / math.pi;
 
 double unwindAngle(double angle) => normalizeToScale(angle, 360.0);
 
-extension CalculationMethodParametersExtension on CalculationMethod {
-  CalculationParameters get parameters {
-    switch (this) {
-      case CalculationMethod.muslimWorldLeague:
-        return CalculationMethodParameters.muslimWorldLeague();
-      case CalculationMethod.egyptian:
-        return CalculationMethodParameters.egyptian();
-      case CalculationMethod.karachi:
-        return CalculationMethodParameters.karachi();
-      case CalculationMethod.ummAlQura:
-        return CalculationMethodParameters.ummAlQura();
-      case CalculationMethod.moonsightingCommittee:
-        return CalculationMethodParameters.moonsightingCommittee();
-      case CalculationMethod.dubai:
-        return CalculationMethodParameters.dubai();
-      case CalculationMethod.kuwait:
-        return CalculationMethodParameters.kuwait();
-      case CalculationMethod.morocco:
-        return CalculationMethodParameters.morocco();
-      case CalculationMethod.northAmerica:
-        return CalculationMethodParameters.northAmerica();
-      case CalculationMethod.other:
-        return CalculationMethodParameters.other();
-      case CalculationMethod.qatar:
-        return CalculationMethodParameters.qatar();
-      case CalculationMethod.singapore:
-        return CalculationMethodParameters.singapore();
-      case CalculationMethod.tehran:
-        return CalculationMethodParameters.tehran();
-      case CalculationMethod.turkiye:
-        return CalculationMethodParameters.turkiye();
-    }
-  }
-}
-
 /// Extension to provide convenient prayer times calculation from coordinates
 extension CoordinatesExtension on Coordinates {
   /// Calculate prayer times for a specific date using the specified method
-  PrayerTimesData prayerTimesFor(DateTime date, CalculationMethod method,
-      {bool roundToMinutes = true}) {
-    return PrayerTimesData.calculate(
+  PrayerTimes prayerTimesFor(
+    DateTime date,
+    CalculationMethod method, {
+    bool roundToMinutes = true,
+  }) {
+    return PrayerTimes(
       date: date,
       coordinates: this,
-      calculationParameters: method.parameters,
+      calculationMethod: method,
       roundToMinutes: roundToMinutes,
     );
   }
 
   /// Calculate prayer times for today using the specified method
-  PrayerTimesData todaysPrayerTimes(CalculationMethod method,
-      {bool roundToMinutes = true}) {
-    return PrayerTimesData.calculate(
+  PrayerTimes todaysPrayerTimes(
+    CalculationMethod method, {
+    bool roundToMinutes = true,
+  }) {
+    return PrayerTimes(
       date: DateTime.now(),
       coordinates: this,
-      calculationParameters: method.parameters,
+      calculationMethod: method,
       roundToMinutes: roundToMinutes,
     );
   }
@@ -108,10 +89,20 @@ extension DateTimeExtensions on DateTime {
 
   /// Rounds to nearest minute unless [precision] is true, in which case the
   /// original instance is returned.
-  DateTime roundedMinute({bool precision = true}) {
-    if (precision) return this;
-    final seconds = toUtc().second % 60;
-    final offset = seconds >= 30 ? 60 - seconds : -1 * seconds;
+  DateTime roundedMinute({Rounding rounding = Rounding.nearest}) {
+    if (rounding == Rounding.none) {
+      return this;
+    }
+
+    final seconds = toUtc().second;
+    int offset;
+
+    if (rounding == Rounding.up) {
+      offset = 60 - seconds;
+    } else {
+      offset = seconds >= 30 ? 60 - seconds : -1 * seconds;
+    }
+
     return addSeconds(offset);
   }
 }

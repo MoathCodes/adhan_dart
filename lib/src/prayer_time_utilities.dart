@@ -1,5 +1,5 @@
 /// DateTime utilities for enhanced prayer time calculations and developer experience
-library prayer_time_utilities;
+library;
 
 import 'package:adhan_dart/adhan_dart.dart';
 
@@ -14,17 +14,17 @@ class NextPrayerInfo {
   const NextPrayerInfo(this.prayer, this.time);
 
   @override
-  String toString() => '${prayer.displayName} at ${time.toString()}';
+  String toString() => '${prayer.name} at ${time.toString()}';
 }
 
-/// Extension on PrayerTimesData for additional utilities
-extension PrayerTimesDataUtilities on PrayerTimesData {
+/// Extension on PrayerTimes for additional utilities
+extension PrayerTimesUtilities on PrayerTimes {
   /// Gets all prayer times as a Map for easy iteration
   ///
   /// Example:
   /// ```dart
   /// for (final entry in prayerTimes.allPrayerTimes.entries) {
-  ///   print('${entry.key.displayName}: ${entry.value}');
+  ///   print('${entry.key.name}: ${entry.value}');
   /// }
   /// ```
   Map<Prayer, DateTime> get allPrayerTimes => {
@@ -46,10 +46,10 @@ extension PrayerTimesDataUtilities on PrayerTimesData {
   /// Useful for calculating Qiyam times or high-latitude rules.
   Duration get nightDuration {
     final nextDay = date.add(const Duration(days: 1));
-    final nextDayPrayerTimes = PrayerTimesData.calculate(
+    final nextDayPrayerTimes = PrayerTimes(
       date: nextDay,
       coordinates: coordinates,
-      calculationParameters: params,
+      calculationMethod: calculationMethod,
     );
     return nextDayPrayerTimes.fajr.difference(maghrib);
   }
@@ -59,7 +59,7 @@ extension PrayerTimesDataUtilities on PrayerTimesData {
   /// Example:
   /// ```dart
   /// for (final entry in prayerTimes.obligatoryPrayerTimes.entries) {
-  ///   print('${entry.key.displayName}: ${entry.value}');
+  ///   print('${entry.key.name}: ${entry.value}');
   /// }
   /// ```
   Map<Prayer, DateTime> get obligatoryPrayerTimes => {
@@ -94,39 +94,10 @@ extension PrayerTimesDataUtilities on PrayerTimesData {
       final timeStr = include24Hour
           ? '${entry.value.hour.toString().padLeft(2, '0')}:${entry.value.minute.toString().padLeft(2, '0')}'
           : _to12HourFormat(entry.value);
-      buffer.writeln('${entry.key.displayName}: $timeStr');
+      buffer.writeln('${entry.key.name}: $timeStr');
     }
 
     return buffer.toString().trim();
-  }
-
-  /// Gets the time for a specific prayer
-  ///
-  /// Returns null if the prayer is not available (e.g., ishaBefore, fajrAfter)
-  ///
-  /// Example:
-  /// ```dart
-  /// final fajrTime = prayerTimes.timeForPrayer(Prayer.fajr);
-  /// ```
-  DateTime? timeForPrayer(Prayer prayer) {
-    switch (prayer) {
-      case Prayer.fajr:
-        return fajr;
-      case Prayer.sunrise:
-        return sunrise;
-      case Prayer.dhuhr:
-        return dhuhr;
-      case Prayer.asr:
-        return asr;
-      case Prayer.maghrib:
-        return maghrib;
-      case Prayer.isha:
-        return isha;
-      case Prayer.ishaBefore:
-        return null; // Not available in PrayerTimesData
-      case Prayer.fajrAfter:
-        return null; // Not available in PrayerTimesData
-    }
   }
 
   String _to12HourFormat(DateTime time) {
@@ -156,26 +127,26 @@ extension PrayerTimeUtilities on DateTime {
   /// ```dart
   /// final currentPrayer = DateTime.now().getCurrentPrayer(
   ///   coordinates: coords,
-  ///   calculationParameters: params,
+  ///   calculationMethod: method,
   /// );
   /// ```
-  Prayer? getCurrentPrayer({
+  Prayer getCurrentPrayer({
     required Coordinates coordinates,
-    required CalculationParameters calculationParameters,
+    required CalculationMethod calculationMethod,
   }) {
-    final prayerTimes = PrayerTimesData.calculate(
+    final prayerTimes = PrayerTimes(
       date: this,
       coordinates: coordinates,
-      calculationParameters: calculationParameters,
+      calculationMethod: calculationMethod,
     );
 
     // Check each prayer time in order
     if (isBefore(prayerTimes.fajr)) {
-      return null; // Night time (before Fajr)
+      return Prayer.ishaBefore; // Night time (before Fajr)
     } else if (isBefore(prayerTimes.sunrise)) {
       return Prayer.fajr;
     } else if (isBefore(prayerTimes.dhuhr)) {
-      return null; // Between sunrise and Dhuhr (no prayer)
+      return Prayer.sunrise; // Between sunrise and Dhuhr (no prayer)
     } else if (isBefore(prayerTimes.asr)) {
       return Prayer.dhuhr;
     } else if (isBefore(prayerTimes.maghrib)) {
@@ -193,18 +164,18 @@ extension PrayerTimeUtilities on DateTime {
   /// ```dart
   /// final nextPrayer = DateTime.now().getNextPrayer(
   ///   coordinates: coords,
-  ///   calculationParameters: params,
+  ///   calculationMethod: method,
   /// );
-  /// print('Next prayer: ${nextPrayer.prayer.displayName} at ${nextPrayer.time}');
+  /// print('Next prayer: ${nextPrayer.prayer.name} at ${nextPrayer.time}');
   /// ```
   NextPrayerInfo getNextPrayer({
     required Coordinates coordinates,
-    required CalculationParameters calculationParameters,
+    required CalculationMethod calculationMethod,
   }) {
-    final prayerTimes = PrayerTimesData.calculate(
+    final prayerTimes = PrayerTimes(
       date: this,
       coordinates: coordinates,
-      calculationParameters: calculationParameters,
+      calculationMethod: calculationMethod,
     );
 
     // Check which prayer comes next
@@ -220,10 +191,10 @@ extension PrayerTimeUtilities on DateTime {
       return NextPrayerInfo(Prayer.isha, prayerTimes.isha);
     } else {
       // After Isha, next prayer is tomorrow's Fajr
-      final tomorrowPrayerTimes = PrayerTimesData.calculate(
+      final tomorrowPrayerTimes = PrayerTimes(
         date: add(const Duration(days: 1)),
         coordinates: coordinates,
-        calculationParameters: calculationParameters,
+        calculationMethod: calculationMethod,
       );
       return NextPrayerInfo(Prayer.fajr, tomorrowPrayerTimes.fajr);
     }
@@ -238,27 +209,27 @@ extension PrayerTimeUtilities on DateTime {
   /// final isDhuhrTime = DateTime.now().isInPrayerWindow(
   ///   Prayer.dhuhr,
   ///   coordinates: coords,
-  ///   calculationParameters: params,
+  ///   calculationMethod: method,
   /// );
   /// ```
   bool isInPrayerWindow(
     Prayer prayer, {
     required Coordinates coordinates,
-    required CalculationParameters calculationParameters,
+    required CalculationMethod calculationMethod,
   }) {
     if (!prayer.isObligatory) {
       throw ArgumentError('Can only check windows for obligatory prayers');
     }
 
-    final prayerTimes = PrayerTimesData.calculate(
+    final prayerTimes = PrayerTimes(
       date: this,
       coordinates: coordinates,
-      calculationParameters: calculationParameters,
+      calculationMethod: calculationMethod,
     );
 
     final prayerTime = prayerTimes.timeForPrayer(prayer);
     final nextPrayerTime = _getNextPrayerTime(
-        prayer, prayerTimes, coordinates, calculationParameters);
+        prayer, prayerTimes, coordinates, calculationMethod);
 
     return isAfter(prayerTime) && isBefore(nextPrayerTime);
   }
@@ -269,23 +240,23 @@ extension PrayerTimeUtilities on DateTime {
   /// ```dart
   /// final timeLeft = DateTime.now().timeUntilNextPrayer(
   ///   coordinates: coords,
-  ///   calculationParameters: params,
+  ///   calculationMethod: method,
   /// );
   /// print('${timeLeft.inMinutes} minutes until next prayer');
   /// ```
   Duration timeUntilNextPrayer({
     required Coordinates coordinates,
-    required CalculationParameters calculationParameters,
+    required CalculationMethod calculationMethod,
   }) {
     final nextPrayer = getNextPrayer(
       coordinates: coordinates,
-      calculationParameters: calculationParameters,
+      calculationMethod: calculationMethod,
     );
     return nextPrayer.time.difference(this);
   }
 
-  DateTime _getNextPrayerTime(Prayer prayer, PrayerTimesData prayerTimes,
-      Coordinates coordinates, CalculationParameters calculationParameters) {
+  DateTime _getNextPrayerTime(Prayer prayer, PrayerTimes prayerTimes,
+      Coordinates coordinates, CalculationMethod calculationMethod) {
     switch (prayer) {
       case Prayer.fajr:
         return prayerTimes.dhuhr;
@@ -298,10 +269,10 @@ extension PrayerTimeUtilities on DateTime {
       case Prayer.isha:
         // Next prayer is tomorrow's Fajr
         final tomorrow = add(const Duration(days: 1));
-        final tomorrowPrayerTimes = PrayerTimesData.calculate(
+        final tomorrowPrayerTimes = PrayerTimes(
           date: tomorrow,
           coordinates: coordinates,
-          calculationParameters: calculationParameters,
+          calculationMethod: calculationMethod,
         );
         return tomorrowPrayerTimes.fajr;
       default:

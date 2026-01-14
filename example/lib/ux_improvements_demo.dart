@@ -5,76 +5,65 @@ void main() {
 
   // 1. More intuitive API with roundToMinutes instead of precision
   print('1. Clearer API parameters:');
-  final times = PrayerTimesData.calculate(
+  final times = PrayerTimes(
     date: DateTime.now(),
     coordinates: const Coordinates(40.7128, -74.0060), // NYC
-    calculationParameters: CalculationMethodParameters.northAmerica(),
+    calculationMethod: CalculationMethod.northAmerica,
     roundToMinutes: true, // Much clearer than precision: false
   );
   print('   ✅ roundToMinutes: true (was precision: false)');
 
   // 2. Convenient factory method
   print('\n2. Convenient factory method:');
-  final quickTimes = PrayerTimesCalculator.forLocation(
+  final quickTimes = PrayerTimes(
     date: DateTime.now(),
-    latitude: 40.7128,
-    longitude: -74.0060,
-    method: CalculationMethod.northAmerica,
+    coordinates: const Coordinates(40.7128, -74.0060), // NYC
+    calculationMethod: CalculationMethod.northAmerica,
+    roundToMinutes: true, // Much clearer than precision: false
   );
   print('   ✅ Simple one-liner for common usage');
 
   // 3. Estimation transparency
   print('\n3. Estimation transparency:');
   print(
-      '   Fajr: ${times.fajr.hour.toString().padLeft(2, '0')}:${times.fajr.minute.toString().padLeft(2, '0')} ${times.isEstimated(Prayer.fajr) ? '(estimated)' : '(calculated)'}');
+    '   Fajr: ${times.fajr.hour.toString().padLeft(2, '0')}:${times.fajr.minute.toString().padLeft(2, '0')} ${times.estimatedPrayers.contains(Prayer.fajr) ? '(estimated)' : '(calculated)'}',
+  );
   print(
-      '   Isha: ${times.isha.hour.toString().padLeft(2, '0')}:${times.isha.minute.toString().padLeft(2, '0')} ${times.isEstimated(Prayer.isha) ? '(estimated)' : '(calculated)'}');
+    '   Isha: ${times.isha.hour.toString().padLeft(2, '0')}:${times.isha.minute.toString().padLeft(2, '0')} ${times.estimatedPrayers.contains(Prayer.isha) ? '(estimated)' : '(calculated)'}',
+  );
 
-  // 4. Validation warnings
-  print('\n4. Validation warnings:');
-  final warnings = times.validate();
-  if (warnings.isEmpty) {
-    print('   ✅ No validation warnings');
-  } else {
-    for (final warning in warnings) {
-      print('   ⚠️  $warning');
-    }
+  // 4. Supported methods discovery
+  print('\n4. Method discovery:');
+  print('   Supported methods: ${CalculationMethod.values.length}');
+  for (final method in CalculationMethod.values.take(3)) {
+    print('   - ${method.runtimeType}');
   }
+  print('   ... and ${CalculationMethod.values.length - 3} more');
 
-  // 5. Supported methods discovery
-  print('\n5. Method discovery:');
-  print(
-      '   Supported methods: ${PrayerTimesCalculator.supportedMethods.length}');
-  for (final method in PrayerTimesCalculator.supportedMethods.take(3)) {
-    print('   - ${method.name}');
-  }
-  print('   ... and ${PrayerTimesCalculator.supportedMethods.length - 3} more');
-
-  // 6. Input validation
-  print('\n6. Input validation:');
+  // 5. Input validation
+  print('\n5. Input validation:');
   try {
-    PrayerTimesCalculator.forLocation(
+    PrayerTimes(
       date: DateTime.now(),
-      latitude: 91.0, // Invalid latitude
-      longitude: 0.0,
-      method: CalculationMethod.northAmerica,
+      coordinates: Coordinates(91.0, 0.0), // Invalid latitude
+      calculationMethod: CalculationMethod.northAmerica,
     );
   } catch (e) {
     print('   ✅ Caught invalid latitude: ${e.toString().split(':')[1].trim()}');
   }
 
-  // 7. High-latitude demonstration
-  print('\n7. High-latitude handling:');
-  final polarTimes = PrayerTimesCalculator.forLocation(
+  // 6. High-latitude demonstration
+  print('\n6. High-latitude handling:');
+  final polarTimes = PrayerTimes(
     date: DateTime(2024, 6, 21), // Summer solstice
-    latitude: 64.1466, // Reykjavik
-    longitude: -21.9426,
-    method: CalculationMethod.muslimWorldLeague,
+    coordinates: const Coordinates(64.1466, -21.9426), // Reykjavik
+    calculationMethod: CalculationMethod.muslimWorldLeague,
   );
 
   if (polarTimes.estimatedPrayers.isNotEmpty) {
     print(
-        '   ⚠️  Using estimated times for extreme latitude: ${polarTimes.estimatedPrayers.map((p) => p.name).join(', ')}');
+      '   ⚠️  Using estimated times for extreme latitude: ${polarTimes.estimatedPrayers.map((p) => p.name).join(', ')}',
+    );
   }
 
   print('\n=== Demo Complete ===');

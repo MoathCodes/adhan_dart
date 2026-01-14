@@ -20,16 +20,16 @@ void benchmarkBasicCalculations() {
 
   const coords = Coordinates(21.3891, 39.8579); // Mecca
   final date = DateTime(2024, 6, 15);
-  final params = CalculationMethodParameters.ummAlQura();
+  const params = UmmAlQura();
 
   const iterations = 100;
   final stopwatch = Stopwatch()..start();
 
   for (int i = 0; i < iterations; i++) {
-    PrayerTimesData.calculate(
+    PrayerTimes(
       date: date,
       coordinates: coords,
-      calculationParameters: params,
+      calculationMethod: params,
       roundToMinutes: true,
     );
   }
@@ -48,16 +48,16 @@ void benchmarkCachingEffectiveness() {
 
   const coords = Coordinates(21.3891, 39.8579);
   final date = DateTime(2024, 6, 15);
-  final params = CalculationMethodParameters.ummAlQura();
+  const params = UmmAlQura();
   const iterations = 50;
 
   // Test repeated calculations (should benefit from caching)
   final repeatedStopwatch = Stopwatch()..start();
   for (int i = 0; i < iterations; i++) {
-    final prayerTimes = PrayerTimesData.calculate(
+    final prayerTimes = PrayerTimes(
       date: date, // Same date
       coordinates: coords, // Same coordinates
-      calculationParameters: params,
+      calculationMethod: params,
     );
     SunnahTimes(prayerTimes);
   }
@@ -66,11 +66,11 @@ void benchmarkCachingEffectiveness() {
   // Test varied calculations (less cache benefit)
   final variedStopwatch = Stopwatch()..start();
   for (int i = 0; i < iterations; i++) {
-    final prayerTimes = PrayerTimesData.calculate(
+    final prayerTimes = PrayerTimes(
       date: date.add(Duration(days: i)), // Different dates
       coordinates: Coordinates(coords.latitude + i * 0.01,
           coords.longitude + i * 0.01), // Different coords
-      calculationParameters: params,
+      calculationMethod: params,
     );
     SunnahTimes(prayerTimes);
   }
@@ -138,12 +138,12 @@ void benchmarkSunnahTimesOptimization() {
 
   const coords = Coordinates(21.3891, 39.8579);
   final date = DateTime(2024, 6, 15);
-  final params = CalculationMethodParameters.ummAlQura();
+  const params = UmmAlQura();
 
-  final prayerTimes = PrayerTimesData.calculate(
+  final prayerTimes = PrayerTimes(
     date: date,
     coordinates: coords,
-    calculationParameters: params,
+    calculationMethod: params,
   );
 
   const iterations = 50;

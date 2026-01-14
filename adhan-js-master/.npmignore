@@ -1,0 +1,15 @@
+.github/
+.husky/
+coverage/
+scripts/
+Shared/
+src/
+test/
+coverage/
+dist/
+*.config.js
+.nvmrc
+.eslint*
+.prettier*
+.releaserc.json
+example.html

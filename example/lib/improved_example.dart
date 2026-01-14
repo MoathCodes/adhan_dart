@@ -21,15 +21,15 @@ void main() {
     print('   ❌ Caught validation error: $e');
   }
 
-  // 2. Regional calculation methods
+  // 2. Regional calculation methods (Using dot shorthand)
   print('\n2. Regional calculation methods:');
-  final saudiParams = CalculationMethodParameters.ummAlQura();
-  final usaParams = CalculationMethodParameters.northAmerica();
-  final ukParams = CalculationMethodParameters.other();
+  final saudiParams = CalculationMethod.ummAlQura;
+  final usaParams = CalculationMethod.northAmerica;
+  const ukParams = MuslimWorldLeague();
 
-  print('   🇸🇦 Saudi Arabia method: ${saudiParams.method}');
-  print('   🇺🇸 USA method: ${usaParams.method}');
-  print('   🇬🇧 UK method: ${ukParams.method}');
+  print('   🇸🇦 Saudi Arabia method: ${saudiParams.runtimeType}');
+  print('   🇺🇸 USA method: ${usaParams.runtimeType}');
+  print('   🇬🇧 UK method: ${ukParams.runtimeType}');
 
   // 3. Convenient extension methods
   print('\n3. Convenient extension methods:');
@@ -48,10 +48,10 @@ void main() {
 
   // 4. Improved copyWith functionality
   print('\n4. Improved copyWith functionality:');
-  final baseParams = CalculationMethodParameters.muslimWorldLeague();
+  const baseParams = MuslimWorldLeague();
   final customParams = baseParams.copyWith(
     madhab: Madhab.hanafi,
-    ishaInterval: 90, // Now works correctly!
+    ishaInterval: 90,
     adjustments: {
       Prayer.fajr: 5,
       Prayer.dhuhr: 3,
@@ -61,17 +61,17 @@ void main() {
       Prayer.sunrise: 0,
     },
   );
-  print('   📋 Base method: ${baseParams.method}');
+  print('   📋 Base method: ${baseParams.runtimeType}');
   print('   ⚙️ Custom madhab: ${customParams.madhab}');
   print('   ⏰ Custom isha interval: ${customParams.ishaInterval} minutes');
 
-  // 5. Enhanced type safety
-  print('\n5. Enhanced type safety:');
+  // 5. Unified PrayerTimes API
+  print('\n5. Unified PrayerTimes API:');
   const coordinates = Coordinates(35.7796, -78.6382); // Raleigh, NC
-  final prayerTimes = PrayerTimesData.calculate(
+  final prayerTimes = PrayerTimes(
     date: DateTime.now(),
     coordinates: coordinates,
-    calculationParameters: CalculationMethodParameters.moonsightingCommittee(),
+    calculationMethod: const MoonsightingCommittee(),
     roundToMinutes: true,
   );
 
@@ -83,9 +83,9 @@ void main() {
   print('   🌇 Maghrib: ${prayerTimes.maghrib}');
   print('   🌙 Isha: ${prayerTimes.isha}');
 
-  // 6. Optimized Sunnah times (avoids duplicate calculations)
+  // 6. Optimized Sunnah times
   print('\n6. Optimized Sunnah times:');
-  final sunnahTimes = SunnahTimes(prayerTimes, roundToMinutes: true);
+  final sunnahTimes = prayerTimes.sunnah;
   print('   🌃 Middle of night: ${sunnahTimes.middleOfTheNight}');
   print('   ⭐ Last third of night: ${sunnahTimes.lastThirdOfTheNight}');
 

@@ -33,63 +33,63 @@ void main() {
           'name': 'Mecca, Saudi Arabia',
           'coordinates': const Coordinates(21.4225, 39.8262),
           'timezone': 'Asia/Riyadh',
-          'method': CalculationMethod.ummAlQura,
+          'method': const UmmAlQura(),
         },
         {
           'name': 'New York, USA',
           'coordinates': const Coordinates(40.7128, -74.0060),
           'timezone': 'America/New_York',
-          'method': CalculationMethod.northAmerica,
+          'method': const NorthAmerica(),
         },
         {
           'name': 'London, UK',
           'coordinates': const Coordinates(51.5074, -0.1278),
           'timezone': 'Europe/London',
-          'method': CalculationMethod.muslimWorldLeague,
+          'method': const MuslimWorldLeague(),
         },
         {
           'name': 'Cairo, Egypt',
           'coordinates': const Coordinates(30.0444, 31.2357),
           'timezone': 'Africa/Cairo',
-          'method': CalculationMethod.egyptian,
+          'method': const Egyptian(),
         },
         {
           'name': 'Karachi, Pakistan',
           'coordinates': const Coordinates(24.8607, 67.0011),
           'timezone': 'Asia/Karachi',
-          'method': CalculationMethod.karachi,
+          'method': const Karachi(),
         },
         // Southern hemisphere & equatorial
         {
           'name': 'Sydney, Australia',
           'coordinates': const Coordinates(-33.8688, 151.2093),
           'timezone': 'Australia/Sydney',
-          'method': CalculationMethod.muslimWorldLeague,
+          'method': const MuslimWorldLeague(),
         },
         {
           'name': 'Nairobi, Kenya',
           'coordinates': const Coordinates(-1.286389, 36.817223),
           'timezone': 'Africa/Nairobi',
-          'method': CalculationMethod.muslimWorldLeague,
+          'method': const MuslimWorldLeague(),
         },
         // High latitude challenging cases
         {
           'name': 'Oslo, Norway',
           'coordinates': const Coordinates(59.9139, 10.7522),
           'timezone': 'Europe/Oslo',
-          'method': CalculationMethod.muslimWorldLeague,
+          'method': const MuslimWorldLeague(),
         },
         {
           'name': 'Reykjavik, Iceland',
           'coordinates': const Coordinates(64.1466, -21.9426),
           'timezone': 'Atlantic/Reykjavik',
-          'method': CalculationMethod.muslimWorldLeague,
+          'method': const MuslimWorldLeague(),
         },
         {
           'name': 'Longyearbyen, Svalbard (extreme)',
           'coordinates': const Coordinates(78.2232, 15.6469),
           'timezone': 'Arctic/Longyearbyen',
-          'method': CalculationMethod.muslimWorldLeague,
+          'method': const MuslimWorldLeague(),
         },
       ];
 
@@ -114,7 +114,7 @@ void main() {
         () async {
       // Test Mecca across different seasons to check seasonal variations
       const coordinates = Coordinates(21.4225, 39.8262); // Mecca
-      const method = CalculationMethod.ummAlQura;
+      const method = UmmAlQura();
       const timezone = 'Asia/Riyadh';
 
       final testDates = [
@@ -144,7 +144,7 @@ void main() {
 
     test('validates DST transition behavior (New York 2024)', () async {
       const coordinates = Coordinates(40.7128, -74.0060);
-      const method = CalculationMethod.northAmerica;
+      const method = NorthAmerica();
       const timezone = 'America/New_York';
 
       // Dates around DST start (Mar 10 2024) and end (Nov 3 2024)
@@ -177,16 +177,16 @@ void main() {
       const coordinates = Coordinates(51.5074, -0.1278); // London
       const timezone = 'Europe/London';
       final methods = [
-        CalculationMethod.muslimWorldLeague,
-        CalculationMethod.egyptian,
-        CalculationMethod.karachi,
-        CalculationMethod.northAmerica,
-        CalculationMethod.ummAlQura,
-        CalculationMethod.dubai,
-        CalculationMethod.moonsightingCommittee,
-        CalculationMethod.kuwait,
-        CalculationMethod.qatar,
-        CalculationMethod.singapore,
+        const MuslimWorldLeague(),
+        const Egyptian(),
+        const Karachi(),
+        const NorthAmerica(),
+        const UmmAlQura(),
+        const Dubai(),
+        const MoonsightingCommittee(),
+        const Kuwait(),
+        const Qatar(),
+        const Singapore(),
       ];
 
       final date = DateTime(2024, 5, 15);
@@ -196,7 +196,7 @@ void main() {
           date: date,
           method: method,
           timezone: timezone,
-          locationName: 'London (${method.name})',
+          locationName: 'London (${method.runtimeType})',
           toleranceOverrideMinutes: 4,
           strictMode: strictMode,
         );
@@ -208,22 +208,22 @@ void main() {
         {
           'coordinates': const Coordinates(21.4225, 39.8262),
           'timezone': 'Asia/Riyadh',
-          'method': CalculationMethod.ummAlQura,
+          'method': const UmmAlQura(),
         },
         {
           'coordinates': const Coordinates(64.1466, -21.9426),
           'timezone': 'Atlantic/Reykjavik',
-          'method': CalculationMethod.muslimWorldLeague,
+          'method': const MuslimWorldLeague(),
         },
         {
           'coordinates': const Coordinates(-33.8688, 151.2093),
           'timezone': 'Australia/Sydney',
-          'method': CalculationMethod.muslimWorldLeague,
+          'method': const MuslimWorldLeague(),
         },
         {
           'coordinates': const Coordinates(40.7128, -74.0060),
           'timezone': 'America/New_York',
-          'method': CalculationMethod.northAmerica,
+          'method': const NorthAmerica(),
         },
       ];
 
@@ -237,13 +237,12 @@ void main() {
         final location = s['timezone'] as String;
         final loc = tz.getLocation(location);
         final method = s['method'] as CalculationMethod;
-        final params = _getCalculationParameters(method);
         final coords = s['coordinates'] as Coordinates;
         for (final date in dates) {
-          final pt = PrayerTimesData.calculate(
+          final pt = PrayerTimes(
             coordinates: coords,
             date: date,
-            calculationParameters: params,
+            calculationMethod: method,
           );
           final fajr = tz.TZDateTime.from(pt.fajr.toUtc(), loc);
           final sunrise = tz.TZDateTime.from(pt.sunrise.toUtc(), loc);
@@ -267,14 +266,13 @@ void main() {
     });
 
     test('currentPrayer / nextPrayer transitions around boundaries', () {
-      final params =
-          _getCalculationParameters(CalculationMethod.muslimWorldLeague);
+      final method = const MuslimWorldLeague();
       const coordinates = Coordinates(40.7128, -74.0060); // New York
       final date = DateTime(2024, 5, 20);
-      final pt = PrayerTimesData.calculate(
+      final pt = PrayerTimes(
         coordinates: coordinates,
         date: date,
-        calculationParameters: params,
+        calculationMethod: method,
       );
 
       final transitions = [
@@ -287,7 +285,7 @@ void main() {
       ];
 
       Prayer expectedCurrent(DateTime t) {
-        if (t.isBefore(pt.fajr)) return Prayer.isha; // previous day isha
+        if (t.isBefore(pt.fajr)) return Prayer.ishaBefore; // previous day isha
         if (t.isBefore(pt.sunrise)) return Prayer.fajr;
         if (t.isBefore(pt.dhuhr)) return Prayer.sunrise;
         if (t.isBefore(pt.asr)) return Prayer.dhuhr;
@@ -309,25 +307,25 @@ void main() {
       for (final moment in transitions) {
         final before = moment.subtract(const Duration(minutes: 1));
         final after = moment.add(const Duration(minutes: 1));
-        expect(pt.currentPrayer(date: before), expectedCurrent(before),
+        expect(pt.currentPrayer(time: before), expectedCurrent(before),
             reason: 'currentPrayer mismatch 1m before $moment');
-        expect(pt.nextPrayer(date: before), expectedNext(before),
+        expect(pt.nextPrayer(time: before), expectedNext(before),
             reason: 'nextPrayer mismatch 1m before $moment');
-        expect(pt.currentPrayer(date: after), expectedCurrent(after),
+        expect(pt.currentPrayer(time: after), expectedCurrent(after),
             reason: 'currentPrayer mismatch 1m after $moment');
-        expect(pt.nextPrayer(date: after), expectedNext(after),
+        expect(pt.nextPrayer(time: after), expectedNext(after),
             reason: 'nextPrayer mismatch 1m after $moment');
       }
     });
 
     test('SunnahTimes internal consistency', () {
-      final params = _getCalculationParameters(CalculationMethod.northAmerica);
+      final method = const NorthAmerica();
       const coordinates = Coordinates(51.5074, -0.1278); // London
       final date = DateTime(2024, 5, 15);
-      final pt = PrayerTimesData.calculate(
+      final pt = PrayerTimes(
         coordinates: coordinates,
         date: date,
-        calculationParameters: params,
+        calculationMethod: method,
       );
       final sunnah = SunnahTimes(pt);
       // Check logical ordering
@@ -342,12 +340,11 @@ void main() {
     test('High-latitude safety constraints (Reykjavik summer)', () {
       const coords = Coordinates(64.1466, -21.9426);
       final date = DateTime(2024, 6, 21);
-      final params =
-          _getCalculationParameters(CalculationMethod.muslimWorldLeague);
-      final pt = PrayerTimesData.calculate(
+      final method = const MuslimWorldLeague();
+      final pt = PrayerTimes(
         coordinates: coords,
         date: date,
-        calculationParameters: params,
+        calculationMethod: method,
       );
       // Reconstruct safe fajr bound: portion * night length
       final nightSeconds = pt.sunrise.difference(pt.maghrib).inSeconds < 0
@@ -356,7 +353,7 @@ void main() {
               .difference(pt.maghrib)
               .inSeconds
           : pt.sunrise.difference(pt.maghrib).inSeconds;
-      final portion = params.nightPortions()[Prayer.fajr]!;
+      final portion = method.nightPortions()[Prayer.fajr]!;
       final maxAdvanceSeconds =
           (portion * nightSeconds).round() + 5 * 60; // 5m grace
       final actualAdvance = pt.sunrise.difference(pt.fajr).inSeconds;
@@ -460,56 +457,28 @@ String _formatTime(DateTime time) {
 /// Converts our CalculationMethod to Aladhan API method number
 int _getAladhanMethodNumber(CalculationMethod method) {
   switch (method) {
-    case CalculationMethod.muslimWorldLeague:
+    case MuslimWorldLeague _:
       return 3;
-    case CalculationMethod.egyptian:
+    case Egyptian _:
       return 5;
-    case CalculationMethod.karachi:
+    case Karachi _:
       return 1;
-    case CalculationMethod.ummAlQura:
+    case UmmAlQura _:
       return 4;
-    case CalculationMethod.dubai:
+    case Dubai _:
       return 8;
-    case CalculationMethod.moonsightingCommittee:
+    case MoonsightingCommittee _:
       return 0;
-    case CalculationMethod.northAmerica:
+    case NorthAmerica _:
       return 2;
-    case CalculationMethod.kuwait:
+    case Kuwait _:
       return 9;
-    case CalculationMethod.qatar:
+    case Qatar _:
       return 11;
-    case CalculationMethod.singapore:
+    case Singapore _:
       return 12;
     default:
       return 3; // Default to Muslim World League
-  }
-}
-
-/// Gets calculation parameters for our library
-CalculationParameters _getCalculationParameters(CalculationMethod method) {
-  switch (method) {
-    case CalculationMethod.muslimWorldLeague:
-      return CalculationMethodParameters.muslimWorldLeague();
-    case CalculationMethod.egyptian:
-      return CalculationMethodParameters.egyptian();
-    case CalculationMethod.karachi:
-      return CalculationMethodParameters.karachi();
-    case CalculationMethod.ummAlQura:
-      return CalculationMethodParameters.ummAlQura();
-    case CalculationMethod.dubai:
-      return CalculationMethodParameters.dubai();
-    case CalculationMethod.moonsightingCommittee:
-      return CalculationMethodParameters.moonsightingCommittee();
-    case CalculationMethod.northAmerica:
-      return CalculationMethodParameters.northAmerica();
-    case CalculationMethod.kuwait:
-      return CalculationMethodParameters.kuwait();
-    case CalculationMethod.qatar:
-      return CalculationMethodParameters.qatar();
-    case CalculationMethod.singapore:
-      return CalculationMethodParameters.singapore();
-    default:
-      return CalculationMethodParameters.muslimWorldLeague();
   }
 }
 
@@ -528,7 +497,8 @@ DateTime? _parseTime(dynamic timeStr, DateTime date) {
 }
 
 _TolerancePlan _toleranceFor(
-    {required Prayer prayer,
+    {
+    required Prayer prayer,
     required double latitude,
     required CalculationMethod method}) {
   // Base soft/hard
@@ -553,7 +523,7 @@ _TolerancePlan _toleranceFor(
   }
 
   // Method-specific tweaks (some methods use fixed intervals or different rounding)
-  if (method == CalculationMethod.ummAlQura && prayer == Prayer.isha) {
+  if (method is UmmAlQura && prayer == Prayer.isha) {
     hard = 35; // fixed interval after maghrib can diverge
     soft = 10;
   }
@@ -573,11 +543,10 @@ Future<void> _validatePrayerTimes({
 }) async {
   try {
     final location = tz.getLocation(timezone);
-    final calculationParams = _getCalculationParameters(method);
-    final ourTimes = PrayerTimesData.calculate(
+    final ourTimes = PrayerTimes(
       coordinates: coordinates,
       date: date,
-      calculationParameters: calculationParams,
+      calculationMethod: method,
     );
     final ourTimesLocal = {
       'fajr': tz.TZDateTime.from(ourTimes.fajr.toUtc(), location),

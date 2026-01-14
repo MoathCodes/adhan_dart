@@ -13,12 +13,12 @@ void main() {
   Coordinates coordinates = const Coordinates(35.78056, -78.6389);
 
   // Parameters
-  final params = CalculationMethodParameters.muslimWorldLeague()
+  final params = CalculationMethod.muslimWorldLeague
       .copyWith(madhab: Madhab.hanafi);
-  final prayerTimes = const PrayerTimesCalculator().calculate(
+  final prayerTimes = PrayerTimes(
       date: date,
       coordinates: coordinates,
-      params: params,
+      calculationMethod: params,
       roundToMinutes: true);
 
   // Prayer times
@@ -35,7 +35,7 @@ void main() {
 
   // Convenience Utilities
   final Prayer current =
-      prayerTimes.currentPrayer(date: DateTime.now()); // date: date
+      prayerTimes.currentPrayer(time: DateTime.now()); // date: date
   DateTime? currentPrayerTime = prayerTimes.timeForPrayer(current);
   final Prayer next = prayerTimes.nextPrayer();
   DateTime? nextPrayerTime = prayerTimes.timeForPrayer(next);
