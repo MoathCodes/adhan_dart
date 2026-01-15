@@ -36,14 +36,17 @@ void main() {
   const meccaCoords = Coordinates(21.3891, 39.8579);
 
   // Get today's prayer times with one method call
-  final todaysPrayers =
-      meccaCoords.todaysPrayerTimes(CalculationMethod.ummAlQura);
+  final todaysPrayers = meccaCoords.todaysPrayerTimes(
+    CalculationMethod.ummAlQura,
+  );
   print('   🕌 Today\'s Fajr in Mecca: ${todaysPrayers.fajr}');
 
   // Get prayer times for a specific date
   final specificDate = DateTime(2024, 12, 25);
-  final christmasPrayers =
-      meccaCoords.prayerTimesFor(specificDate, CalculationMethod.ummAlQura);
+  final christmasPrayers = meccaCoords.prayerTimesFor(
+    specificDate,
+    CalculationMethod.ummAlQura,
+  );
   print('   🎄 Christmas Day Fajr in Mecca: ${christmasPrayers.fajr}');
 
   // 4. Improved copyWith functionality
@@ -93,7 +96,8 @@ void main() {
   print('\n7. Qibla direction:');
   final qiblaDirection = Qibla.qibla(coordinates);
   print(
-      '   🧭 Qibla direction from Raleigh: ${qiblaDirection.toStringAsFixed(2)}°');
+    '   🧭 Qibla direction from Raleigh: ${qiblaDirection.toStringAsFixed(2)}°',
+  );
 
   print('\n✨ All improvements demonstrated successfully!');
 }

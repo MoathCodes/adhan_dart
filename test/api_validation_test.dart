@@ -19,128 +19,133 @@ void main() {
   final bool strictMode = Platform.environment['STRICT_API_VALIDATION'] == '1';
 
   group('Prayer Times API Validation', () {
-    test('validates calculations against Aladhan API for multiple locations',
-        () async {
-      if (shortMode) {
-        print(
-            'Skipping heavy multi-location test in SHORT_API_VALIDATION mode');
-        return;
-      }
-      // Test locations with different characteristics
-      final testCases = [
-        // Major cities with different latitudes
-        {
-          'name': 'Mecca, Saudi Arabia',
-          'coordinates': const Coordinates(21.4225, 39.8262),
-          'timezone': 'Asia/Riyadh',
-          'method': const UmmAlQura(),
-        },
-        {
-          'name': 'New York, USA',
-          'coordinates': const Coordinates(40.7128, -74.0060),
-          'timezone': 'America/New_York',
-          'method': const NorthAmerica(),
-        },
-        {
-          'name': 'London, UK',
-          'coordinates': const Coordinates(51.5074, -0.1278),
-          'timezone': 'Europe/London',
-          'method': const MuslimWorldLeague(),
-        },
-        {
-          'name': 'Cairo, Egypt',
-          'coordinates': const Coordinates(30.0444, 31.2357),
-          'timezone': 'Africa/Cairo',
-          'method': const Egyptian(),
-        },
-        {
-          'name': 'Karachi, Pakistan',
-          'coordinates': const Coordinates(24.8607, 67.0011),
-          'timezone': 'Asia/Karachi',
-          'method': const Karachi(),
-        },
-        // Southern hemisphere & equatorial
-        {
-          'name': 'Sydney, Australia',
-          'coordinates': const Coordinates(-33.8688, 151.2093),
-          'timezone': 'Australia/Sydney',
-          'method': const MuslimWorldLeague(),
-        },
-        {
-          'name': 'Nairobi, Kenya',
-          'coordinates': const Coordinates(-1.286389, 36.817223),
-          'timezone': 'Africa/Nairobi',
-          'method': const MuslimWorldLeague(),
-        },
-        // High latitude challenging cases
-        {
-          'name': 'Oslo, Norway',
-          'coordinates': const Coordinates(59.9139, 10.7522),
-          'timezone': 'Europe/Oslo',
-          'method': const MuslimWorldLeague(),
-        },
-        {
-          'name': 'Reykjavik, Iceland',
-          'coordinates': const Coordinates(64.1466, -21.9426),
-          'timezone': 'Atlantic/Reykjavik',
-          'method': const MuslimWorldLeague(),
-        },
-        {
-          'name': 'Longyearbyen, Svalbard (extreme)',
-          'coordinates': const Coordinates(78.2232, 15.6469),
-          'timezone': 'Arctic/Longyearbyen',
-          'method': const MuslimWorldLeague(),
-        },
-      ];
+    test(
+      'validates calculations against Aladhan API for multiple locations',
+      () async {
+        if (shortMode) {
+          print(
+            'Skipping heavy multi-location test in SHORT_API_VALIDATION mode',
+          );
+          return;
+        }
+        // Test locations with different characteristics
+        final testCases = [
+          // Major cities with different latitudes
+          {
+            'name': 'Mecca, Saudi Arabia',
+            'coordinates': const Coordinates(21.4225, 39.8262),
+            'timezone': 'Asia/Riyadh',
+            'method': const UmmAlQura(),
+          },
+          {
+            'name': 'New York, USA',
+            'coordinates': const Coordinates(40.7128, -74.0060),
+            'timezone': 'America/New_York',
+            'method': const NorthAmerica(),
+          },
+          {
+            'name': 'London, UK',
+            'coordinates': const Coordinates(51.5074, -0.1278),
+            'timezone': 'Europe/London',
+            'method': const MuslimWorldLeague(),
+          },
+          {
+            'name': 'Cairo, Egypt',
+            'coordinates': const Coordinates(30.0444, 31.2357),
+            'timezone': 'Africa/Cairo',
+            'method': const Egyptian(),
+          },
+          {
+            'name': 'Karachi, Pakistan',
+            'coordinates': const Coordinates(24.8607, 67.0011),
+            'timezone': 'Asia/Karachi',
+            'method': const Karachi(),
+          },
+          // Southern hemisphere & equatorial
+          {
+            'name': 'Sydney, Australia',
+            'coordinates': const Coordinates(-33.8688, 151.2093),
+            'timezone': 'Australia/Sydney',
+            'method': const MuslimWorldLeague(),
+          },
+          {
+            'name': 'Nairobi, Kenya',
+            'coordinates': const Coordinates(-1.286389, 36.817223),
+            'timezone': 'Africa/Nairobi',
+            'method': const MuslimWorldLeague(),
+          },
+          // High latitude challenging cases
+          {
+            'name': 'Oslo, Norway',
+            'coordinates': const Coordinates(59.9139, 10.7522),
+            'timezone': 'Europe/Oslo',
+            'method': const MuslimWorldLeague(),
+          },
+          {
+            'name': 'Reykjavik, Iceland',
+            'coordinates': const Coordinates(64.1466, -21.9426),
+            'timezone': 'Atlantic/Reykjavik',
+            'method': const MuslimWorldLeague(),
+          },
+          {
+            'name': 'Longyearbyen, Svalbard (extreme)',
+            'coordinates': const Coordinates(78.2232, 15.6469),
+            'timezone': 'Arctic/Longyearbyen',
+            'method': const MuslimWorldLeague(),
+          },
+        ];
 
-      for (final testCase in testCases) {
-        print('\n🕌 Testing ${testCase['name']}...');
-        final coordinates = testCase['coordinates'] as Coordinates;
-        final method = testCase['method'] as CalculationMethod;
-        final timezone = testCase['timezone'] as String;
-        final date = DateTime.now();
-        await _validatePrayerTimes(
-          coordinates: coordinates,
-          date: date,
-          method: method,
-          timezone: timezone,
-          locationName: testCase['name'] as String,
-          strictMode: strictMode,
-        );
-      }
-    });
+        for (final testCase in testCases) {
+          print('\n🕌 Testing ${testCase['name']}...');
+          final coordinates = testCase['coordinates'] as Coordinates;
+          final method = testCase['method'] as CalculationMethod;
+          final timezone = testCase['timezone'] as String;
+          final date = DateTime.now();
+          await _validatePrayerTimes(
+            coordinates: coordinates,
+            date: date,
+            method: method,
+            timezone: timezone,
+            locationName: testCase['name'] as String,
+            strictMode: strictMode,
+          );
+        }
+      },
+    );
 
-    test('validates calculations for different dates throughout the year',
-        () async {
-      // Test Mecca across different seasons to check seasonal variations
-      const coordinates = Coordinates(21.4225, 39.8262); // Mecca
-      const method = UmmAlQura();
-      const timezone = 'Asia/Riyadh';
+    test(
+      'validates calculations for different dates throughout the year',
+      () async {
+        // Test Mecca across different seasons to check seasonal variations
+        const coordinates = Coordinates(21.4225, 39.8262); // Mecca
+        const method = UmmAlQura();
+        const timezone = 'Asia/Riyadh';
 
-      final testDates = [
-        DateTime(2024, 1, 15), // Winter
-        DateTime(2024, 3, 20), // Around March equinox
-        DateTime(2024, 4, 15), // Spring
-        DateTime(2024, 6, 21), // Summer solstice
-        DateTime(2024, 7, 15), // Summer
-        DateTime(2024, 9, 22), // Around September equinox
-        DateTime(2024, 10, 15), // Fall
-        DateTime(2024, 12, 21), // Winter solstice
-        DateTime(2024, 2, 29), // Leap day
-      ];
+        final testDates = [
+          DateTime(2024, 1, 15), // Winter
+          DateTime(2024, 3, 20), // Around March equinox
+          DateTime(2024, 4, 15), // Spring
+          DateTime(2024, 6, 21), // Summer solstice
+          DateTime(2024, 7, 15), // Summer
+          DateTime(2024, 9, 22), // Around September equinox
+          DateTime(2024, 10, 15), // Fall
+          DateTime(2024, 12, 21), // Winter solstice
+          DateTime(2024, 2, 29), // Leap day
+        ];
 
-      for (final date in testDates) {
-        print('\n📅 Testing date: ${date.toIso8601String().split('T')[0]}');
-        await _validatePrayerTimes(
-          coordinates: coordinates,
-          date: date,
-          method: method,
-          timezone: timezone,
-          locationName: 'Mecca (seasonal test)',
-          strictMode: strictMode,
-        );
-      }
-    });
+        for (final date in testDates) {
+          print('\n📅 Testing date: ${date.toIso8601String().split('T')[0]}');
+          await _validatePrayerTimes(
+            coordinates: coordinates,
+            date: date,
+            method: method,
+            timezone: timezone,
+            locationName: 'Mecca (seasonal test)',
+            strictMode: strictMode,
+          );
+        }
+      },
+    );
 
     test('validates DST transition behavior (New York 2024)', () async {
       const coordinates = Coordinates(40.7128, -74.0060);
@@ -172,36 +177,38 @@ void main() {
       }
     });
 
-    test('validates multiple calculation methods consistency for a location',
-        () async {
-      const coordinates = Coordinates(51.5074, -0.1278); // London
-      const timezone = 'Europe/London';
-      final methods = [
-        const MuslimWorldLeague(),
-        const Egyptian(),
-        const Karachi(),
-        const NorthAmerica(),
-        const UmmAlQura(),
-        const Dubai(),
-        const MoonsightingCommittee(),
-        const Kuwait(),
-        const Qatar(),
-        const Singapore(),
-      ];
+    test(
+      'validates multiple calculation methods consistency for a location',
+      () async {
+        const coordinates = Coordinates(51.5074, -0.1278); // London
+        const timezone = 'Europe/London';
+        final methods = [
+          const MuslimWorldLeague(),
+          const Egyptian(),
+          const Karachi(),
+          const NorthAmerica(),
+          const UmmAlQura(),
+          const Dubai(),
+          const MoonsightingCommittee(),
+          const Kuwait(),
+          const Qatar(),
+          const Singapore(),
+        ];
 
-      final date = DateTime(2024, 5, 15);
-      for (final method in methods) {
-        await _validatePrayerTimes(
-          coordinates: coordinates,
-          date: date,
-          method: method,
-          timezone: timezone,
-          locationName: 'London (${method.runtimeType})',
-          toleranceOverrideMinutes: 4,
-          strictMode: strictMode,
-        );
-      }
-    });
+        final date = DateTime(2024, 5, 15);
+        for (final method in methods) {
+          await _validatePrayerTimes(
+            coordinates: coordinates,
+            date: date,
+            method: method,
+            timezone: timezone,
+            locationName: 'London (${method.runtimeType})',
+            toleranceOverrideMinutes: 4,
+            strictMode: strictMode,
+          );
+        }
+      },
+    );
 
     test('temporal ordering of prayers across diverse locations/dates', () {
       final scenarios = [
@@ -251,16 +258,31 @@ void main() {
           final maghrib = tz.TZDateTime.from(pt.maghrib.toUtc(), loc);
           final isha = tz.TZDateTime.from(pt.isha.toUtc(), loc);
 
-          expect(fajr.isBefore(sunrise), true,
-              reason: 'Fajr should be before Sunrise for $location on $date');
-          expect(sunrise.isBefore(dhuhr), true,
-              reason: 'Sunrise should be before Dhuhr for $location on $date');
-          expect(dhuhr.isBefore(asr), true,
-              reason: 'Dhuhr should be before Asr for $location on $date');
-          expect(asr.isBefore(maghrib), true,
-              reason: 'Asr should be before Maghrib for $location on $date');
-          expect(maghrib.isBefore(isha), true,
-              reason: 'Maghrib should be before Isha for $location on $date');
+          expect(
+            fajr.isBefore(sunrise),
+            true,
+            reason: 'Fajr should be before Sunrise for $location on $date',
+          );
+          expect(
+            sunrise.isBefore(dhuhr),
+            true,
+            reason: 'Sunrise should be before Dhuhr for $location on $date',
+          );
+          expect(
+            dhuhr.isBefore(asr),
+            true,
+            reason: 'Dhuhr should be before Asr for $location on $date',
+          );
+          expect(
+            asr.isBefore(maghrib),
+            true,
+            reason: 'Asr should be before Maghrib for $location on $date',
+          );
+          expect(
+            maghrib.isBefore(isha),
+            true,
+            reason: 'Maghrib should be before Isha for $location on $date',
+          );
         }
       }
     });
@@ -307,14 +329,26 @@ void main() {
       for (final moment in transitions) {
         final before = moment.subtract(const Duration(minutes: 1));
         final after = moment.add(const Duration(minutes: 1));
-        expect(pt.currentPrayer(time: before), expectedCurrent(before),
-            reason: 'currentPrayer mismatch 1m before $moment');
-        expect(pt.nextPrayer(time: before), expectedNext(before),
-            reason: 'nextPrayer mismatch 1m before $moment');
-        expect(pt.currentPrayer(time: after), expectedCurrent(after),
-            reason: 'currentPrayer mismatch 1m after $moment');
-        expect(pt.nextPrayer(time: after), expectedNext(after),
-            reason: 'nextPrayer mismatch 1m after $moment');
+        expect(
+          pt.currentPrayer(time: before),
+          expectedCurrent(before),
+          reason: 'currentPrayer mismatch 1m before $moment',
+        );
+        expect(
+          pt.nextPrayer(time: before),
+          expectedNext(before),
+          reason: 'nextPrayer mismatch 1m before $moment',
+        );
+        expect(
+          pt.currentPrayer(time: after),
+          expectedCurrent(after),
+          reason: 'currentPrayer mismatch 1m after $moment',
+        );
+        expect(
+          pt.nextPrayer(time: after),
+          expectedNext(after),
+          reason: 'nextPrayer mismatch 1m after $moment',
+        );
       }
     });
 
@@ -331,7 +365,9 @@ void main() {
       // Check logical ordering
       expect(pt.maghrib.isBefore(sunnah.middleOfTheNight), true);
       expect(
-          sunnah.middleOfTheNight.isBefore(sunnah.lastThirdOfTheNight), true);
+        sunnah.middleOfTheNight.isBefore(sunnah.lastThirdOfTheNight),
+        true,
+      );
       // Check intervals roughly plausible (< 24h and positive)
       final nightLen = pt.fajr.difference(pt.maghrib).inHours.abs();
       expect(nightLen > 0 && nightLen < 24, true);
@@ -349,49 +385,58 @@ void main() {
       // Reconstruct safe fajr bound: portion * night length
       final nightSeconds = pt.sunrise.difference(pt.maghrib).inSeconds < 0
           ? pt.sunrise
-              .add(const Duration(days: 1))
-              .difference(pt.maghrib)
-              .inSeconds
+                .add(const Duration(days: 1))
+                .difference(pt.maghrib)
+                .inSeconds
           : pt.sunrise.difference(pt.maghrib).inSeconds;
       final portion = method.nightPortions()[Prayer.fajr]!;
       final maxAdvanceSeconds =
           (portion * nightSeconds).round() + 5 * 60; // 5m grace
       final actualAdvance = pt.sunrise.difference(pt.fajr).inSeconds;
-      expect(actualAdvance <= maxAdvanceSeconds, true,
-          reason: 'Fajr earlier than safe portion allowance');
+      expect(
+        actualAdvance <= maxAdvanceSeconds,
+        true,
+        reason: 'Fajr earlier than safe portion allowance',
+      );
     });
   });
 }
 
 /// Compares two prayer times with dynamic tolerances.
 void _comparePrayerTime(
-    String prayerName,
-    Prayer prayer,
-    Coordinates coords,
-    CalculationMethod method,
-    DateTime ourTime,
-    DateTime? apiTime,
-    bool strictMode,
-    {int? overrideStrict}) {
+  String prayerName,
+  Prayer prayer,
+  Coordinates coords,
+  CalculationMethod method,
+  DateTime ourTime,
+  DateTime? apiTime,
+  bool strictMode, {
+  int? overrideStrict,
+}) {
   if (apiTime == null) {
     print('⚠️  No API time for $prayerName, skipping comparison');
     return;
   }
-  final plan =
-      _toleranceFor(prayer: prayer, latitude: coords.latitude, method: method);
-  final minutesDiff = (ourTime.hour * 60 +
-          ourTime.minute -
-          (apiTime.hour * 60 + apiTime.minute))
-      .abs();
+  final plan = _toleranceFor(
+    prayer: prayer,
+    latitude: coords.latitude,
+    method: method,
+  );
+  final minutesDiff =
+      (ourTime.hour * 60 +
+              ourTime.minute -
+              (apiTime.hour * 60 + apiTime.minute))
+          .abs();
   final strictLimit = overrideStrict ?? plan.soft;
   final hardLimit = plan.hard;
   final status = minutesDiff <= strictLimit
       ? '✅'
       : minutesDiff <= hardLimit
-          ? '⚠️'
-          : '❌';
+      ? '⚠️'
+      : '❌';
   print(
-      '$status $prayerName: Our=${_formatTime(ourTime)} API=${_formatTime(apiTime)} Diff=${minutesDiff}m (soft≤$strictLimit, hard≤$hardLimit)');
+    '$status $prayerName: Our=${_formatTime(ourTime)} API=${_formatTime(apiTime)} Diff=${minutesDiff}m (soft≤$strictLimit, hard≤$hardLimit)',
+  );
   if (minutesDiff <= strictLimit) {
     return; // pass silently
   }
@@ -399,13 +444,15 @@ void _comparePrayerTime(
     // soft warning; only fail if strictMode
     if (strictMode) {
       fail(
-          '$prayerName soft tolerance exceeded in strict mode: diff=$minutesDiff > $strictLimit (hard=$hardLimit)');
+        '$prayerName soft tolerance exceeded in strict mode: diff=$minutesDiff > $strictLimit (hard=$hardLimit)',
+      );
     }
     return; // warning only
   }
   // Hard failure always
   fail(
-      '$prayerName difference $minutesDiff exceeds hard tolerance $hardLimit (strictLimit=$strictLimit). Our=${_formatTime(ourTime)} API=${_formatTime(apiTime)}');
+    '$prayerName difference $minutesDiff exceeds hard tolerance $hardLimit (strictLimit=$strictLimit). Our=${_formatTime(ourTime)} API=${_formatTime(apiTime)}',
+  );
 }
 
 /// Fetches prayer times from Aladhan API
@@ -417,7 +464,8 @@ Future<Map<String, DateTime?>> _fetchFromAladhanAPI({
   try {
     final methodNumber = _getAladhanMethodNumber(method);
     final dateStr = '${date.day}-${date.month}-${date.year}';
-    final url = 'http://api.aladhan.com/v1/timings/$dateStr'
+    final url =
+        'http://api.aladhan.com/v1/timings/$dateStr'
         '?latitude=${coordinates.latitude}'
         '&longitude=${coordinates.longitude}'
         '&method=$methodNumber';
@@ -496,11 +544,11 @@ DateTime? _parseTime(dynamic timeStr, DateTime date) {
   return DateTime(date.year, date.month, date.day, hour, minute);
 }
 
-_TolerancePlan _toleranceFor(
-    {
-    required Prayer prayer,
-    required double latitude,
-    required CalculationMethod method}) {
+_TolerancePlan _toleranceFor({
+  required Prayer prayer,
+  required double latitude,
+  required CalculationMethod method,
+}) {
   // Base soft/hard
   int soft = 3; // aims for near alignment
   int hard = 5; // default strict fail threshold
@@ -563,28 +611,71 @@ Future<void> _validatePrayerTimes({
     );
     if (apiTimes.isEmpty) {
       print(
-          '⚠️  Could not fetch API data for $locationName, skipping validation');
+        '⚠️  Could not fetch API data for $locationName, skipping validation',
+      );
       return;
     }
     final override = toleranceOverrideMinutes; // applies to soft limit only
-    _comparePrayerTime('Fajr', Prayer.fajr, coordinates, method,
-        ourTimesLocal['fajr']!, apiTimes['fajr'], strictMode,
-        overrideStrict: override);
-    _comparePrayerTime('Sunrise', Prayer.sunrise, coordinates, method,
-        ourTimesLocal['sunrise']!, apiTimes['sunrise'], strictMode,
-        overrideStrict: override);
-    _comparePrayerTime('Dhuhr', Prayer.dhuhr, coordinates, method,
-        ourTimesLocal['dhuhr']!, apiTimes['dhuhr'], strictMode,
-        overrideStrict: override);
-    _comparePrayerTime('Asr', Prayer.asr, coordinates, method,
-        ourTimesLocal['asr']!, apiTimes['asr'], strictMode,
-        overrideStrict: override);
-    _comparePrayerTime('Maghrib', Prayer.maghrib, coordinates, method,
-        ourTimesLocal['maghrib']!, apiTimes['maghrib'], strictMode,
-        overrideStrict: override);
-    _comparePrayerTime('Isha', Prayer.isha, coordinates, method,
-        ourTimesLocal['isha']!, apiTimes['isha'], strictMode,
-        overrideStrict: override);
+    _comparePrayerTime(
+      'Fajr',
+      Prayer.fajr,
+      coordinates,
+      method,
+      ourTimesLocal['fajr']!,
+      apiTimes['fajr'],
+      strictMode,
+      overrideStrict: override,
+    );
+    _comparePrayerTime(
+      'Sunrise',
+      Prayer.sunrise,
+      coordinates,
+      method,
+      ourTimesLocal['sunrise']!,
+      apiTimes['sunrise'],
+      strictMode,
+      overrideStrict: override,
+    );
+    _comparePrayerTime(
+      'Dhuhr',
+      Prayer.dhuhr,
+      coordinates,
+      method,
+      ourTimesLocal['dhuhr']!,
+      apiTimes['dhuhr'],
+      strictMode,
+      overrideStrict: override,
+    );
+    _comparePrayerTime(
+      'Asr',
+      Prayer.asr,
+      coordinates,
+      method,
+      ourTimesLocal['asr']!,
+      apiTimes['asr'],
+      strictMode,
+      overrideStrict: override,
+    );
+    _comparePrayerTime(
+      'Maghrib',
+      Prayer.maghrib,
+      coordinates,
+      method,
+      ourTimesLocal['maghrib']!,
+      apiTimes['maghrib'],
+      strictMode,
+      overrideStrict: override,
+    );
+    _comparePrayerTime(
+      'Isha',
+      Prayer.isha,
+      coordinates,
+      method,
+      ourTimesLocal['isha']!,
+      apiTimes['isha'],
+      strictMode,
+      overrideStrict: override,
+    );
     print('✅ $locationName validation complete');
   } catch (e) {
     print('❌ Error validating $locationName: $e');

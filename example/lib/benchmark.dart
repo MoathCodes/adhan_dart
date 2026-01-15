@@ -11,7 +11,8 @@ void main() {
   benchmarkCachingEffectiveness();
 
   print(
-      '\n✨ Benchmark complete! See PERFORMANCE_REPORT.md for detailed analysis.');
+    '\n✨ Benchmark complete! See PERFORMANCE_REPORT.md for detailed analysis.',
+  );
 }
 
 void benchmarkBasicCalculations() {
@@ -39,7 +40,8 @@ void benchmarkBasicCalculations() {
 
   print('   ✅ Average time: ${avgTime.toStringAsFixed(0)}μs per calculation');
   print(
-      '   📊 Total time: ${stopwatch.elapsedMilliseconds}ms for $iterations calculations\n');
+    '   📊 Total time: ${stopwatch.elapsedMilliseconds}ms for $iterations calculations\n',
+  );
 }
 
 void benchmarkCachingEffectiveness() {
@@ -68,8 +70,10 @@ void benchmarkCachingEffectiveness() {
   for (int i = 0; i < iterations; i++) {
     final prayerTimes = PrayerTimes(
       date: date.add(Duration(days: i)), // Different dates
-      coordinates: Coordinates(coords.latitude + i * 0.01,
-          coords.longitude + i * 0.01), // Different coords
+      coordinates: Coordinates(
+        coords.latitude + i * 0.01,
+        coords.longitude + i * 0.01,
+      ), // Different coords
       calculationMethod: params,
     );
     SunnahTimes(prayerTimes);
@@ -78,16 +82,20 @@ void benchmarkCachingEffectiveness() {
 
   if (repeatedStopwatch.elapsedMilliseconds <
       variedStopwatch.elapsedMilliseconds) {
-    final benefit = ((variedStopwatch.elapsedMilliseconds -
+    final benefit =
+        ((variedStopwatch.elapsedMilliseconds -
             repeatedStopwatch.elapsedMilliseconds) /
         variedStopwatch.elapsedMilliseconds *
         100);
     print(
-        '   ✅ Repeated calculations: ${repeatedStopwatch.elapsedMilliseconds}ms');
+      '   ✅ Repeated calculations: ${repeatedStopwatch.elapsedMilliseconds}ms',
+    );
     print(
-        '   📊 Varied calculations: ${variedStopwatch.elapsedMilliseconds}ms');
+      '   📊 Varied calculations: ${variedStopwatch.elapsedMilliseconds}ms',
+    );
     print(
-        '   🚀 Cache benefit: ${benefit.toStringAsFixed(1)}% faster for repeated patterns');
+      '   🚀 Cache benefit: ${benefit.toStringAsFixed(1)}% faster for repeated patterns',
+    );
   } else {
     print('   📊 No significant cache benefit detected');
   }
@@ -114,14 +122,16 @@ void benchmarkCoordinateValidation() {
   }
   validatedStopwatch.stop();
 
-  final overhead = validatedStopwatch.elapsedMicroseconds -
+  final overhead =
+      validatedStopwatch.elapsedMicroseconds -
       regularStopwatch.elapsedMicroseconds;
   final overheadPercent =
       (overhead / regularStopwatch.elapsedMicroseconds * 100);
 
   print('   ✅ Regular constructor: ${regularStopwatch.elapsedMicroseconds}μs');
   print(
-      '   🛡️  Validated constructor: ${validatedStopwatch.elapsedMicroseconds}μs');
+    '   🛡️  Validated constructor: ${validatedStopwatch.elapsedMicroseconds}μs',
+  );
   print('   📈 Validation overhead: ${overheadPercent.toStringAsFixed(1)}%');
 
   if (overhead < 0) {
@@ -158,14 +168,19 @@ void benchmarkSunnahTimesOptimization() {
 
   // Verify caching works (all results should be identical)
   final first = results.first;
-  final allIdentical = results.every((s) =>
-      s.middleOfTheNight == first.middleOfTheNight &&
-      s.lastThirdOfTheNight == first.lastThirdOfTheNight);
+  final allIdentical = results.every(
+    (s) =>
+        s.middleOfTheNight == first.middleOfTheNight &&
+        s.lastThirdOfTheNight == first.lastThirdOfTheNight,
+  );
 
   print(
-      '   ✅ Average time: ${(stopwatch.elapsedMicroseconds / iterations).toStringAsFixed(1)}μs per SunnahTimes');
+    '   ✅ Average time: ${(stopwatch.elapsedMicroseconds / iterations).toStringAsFixed(1)}μs per SunnahTimes',
+  );
   print(
-      '   🎯 Caching working: ${allIdentical ? 'Yes' : 'No'} (all results identical)');
+    '   🎯 Caching working: ${allIdentical ? 'Yes' : 'No'} (all results identical)',
+  );
   print(
-      '   📊 Total time: ${stopwatch.elapsedMilliseconds}ms for $iterations calculations\n');
+    '   📊 Total time: ${stopwatch.elapsedMilliseconds}ms for $iterations calculations\n',
+  );
 }

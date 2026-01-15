@@ -21,12 +21,12 @@ enum Prayer {
 
   /// Gets all obligatory prayers in order
   static List<Prayer> get obligatoryPrayers => [
-        Prayer.fajr,
-        Prayer.dhuhr,
-        Prayer.asr,
-        Prayer.maghrib,
-        Prayer.isha,
-      ];
+    Prayer.fajr,
+    Prayer.dhuhr,
+    Prayer.asr,
+    Prayer.maghrib,
+    Prayer.isha,
+  ];
 
   /// Whether this is one of the five obligatory prayers
   bool get isObligatory {

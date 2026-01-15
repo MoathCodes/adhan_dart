@@ -43,7 +43,8 @@ class PolarCircleResolver {
     final solarTime = SolarTime(testDate, coordinates);
     final tomorrowSolarTime = SolarTime(tomorrow, coordinates);
 
-    if (!_isValidSolarTime(solarTime) || !_isValidSolarTime(tomorrowSolarTime)) {
+    if (!_isValidSolarTime(solarTime) ||
+        !_isValidSolarTime(tomorrowSolarTime)) {
       return _aqrabYaumResolver(
         coordinates,
         date,
@@ -66,11 +67,18 @@ class PolarCircleResolver {
     DateTime date,
     double latitude,
   ) {
-    final solarTime = SolarTime(date, Coordinates(latitude, coordinates.longitude));
+    final solarTime = SolarTime(
+      date,
+      Coordinates(latitude, coordinates.longitude),
+    );
     final tomorrow = date.addDays(1);
-    final tomorrowSolarTime = SolarTime(tomorrow, Coordinates(latitude, coordinates.longitude));
+    final tomorrowSolarTime = SolarTime(
+      tomorrow,
+      Coordinates(latitude, coordinates.longitude),
+    );
 
-    if (!_isValidSolarTime(solarTime) || !_isValidSolarTime(tomorrowSolarTime)) {
+    if (!_isValidSolarTime(solarTime) ||
+        !_isValidSolarTime(tomorrowSolarTime)) {
       return latitude.abs() >= _unsafeLatitude
           ? _aqrabBaladResolver(
               coordinates,
@@ -109,7 +117,8 @@ class PolarCircleResolver {
         return _aqrabBaladResolver(
               coordinates,
               date,
-              coordinates.latitude - (coordinates.latitude.sign * _latitudeVariationStep),
+              coordinates.latitude -
+                  (coordinates.latitude.sign * _latitudeVariationStep),
             ) ??
             defaultReturn;
       default:

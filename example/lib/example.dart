@@ -13,13 +13,15 @@ void main() {
   Coordinates coordinates = const Coordinates(35.78056, -78.6389);
 
   // Parameters
-  final params = CalculationMethod.muslimWorldLeague
-      .copyWith(madhab: Madhab.hanafi);
+  final params = CalculationMethod.muslimWorldLeague.copyWith(
+    madhab: Madhab.hanafi,
+  );
   final prayerTimes = PrayerTimes(
-      date: date,
-      coordinates: coordinates,
-      calculationMethod: params,
-      roundToMinutes: true);
+    date: date,
+    coordinates: coordinates,
+    calculationMethod: params,
+    roundToMinutes: true,
+  );
 
   // Prayer times
   DateTime fajrTime = tz.TZDateTime.from(prayerTimes.fajr, location);
@@ -29,23 +31,30 @@ void main() {
   DateTime maghribTime = tz.TZDateTime.from(prayerTimes.maghrib, location);
   DateTime ishaTime = tz.TZDateTime.from(prayerTimes.isha, location);
 
-  DateTime ishabeforeTime =
-      tz.TZDateTime.from(prayerTimes.ishaBefore, location);
+  DateTime ishabeforeTime = tz.TZDateTime.from(
+    prayerTimes.ishaBefore,
+    location,
+  );
   DateTime fajrafterTime = tz.TZDateTime.from(prayerTimes.fajrAfter, location);
 
   // Convenience Utilities
-  final Prayer current =
-      prayerTimes.currentPrayer(time: DateTime.now()); // date: date
+  final Prayer current = prayerTimes.currentPrayer(
+    time: DateTime.now(),
+  ); // date: date
   DateTime? currentPrayerTime = prayerTimes.timeForPrayer(current);
   final Prayer next = prayerTimes.nextPrayer();
   DateTime? nextPrayerTime = prayerTimes.timeForPrayer(next);
 
   // Sunnah Times
   final sunnahTimes = SunnahTimes(prayerTimes);
-  DateTime middleOfTheNight =
-      tz.TZDateTime.from(sunnahTimes.middleOfTheNight, location);
-  DateTime lastThirdOfTheNight =
-      tz.TZDateTime.from(sunnahTimes.lastThirdOfTheNight, location);
+  DateTime middleOfTheNight = tz.TZDateTime.from(
+    sunnahTimes.middleOfTheNight,
+    location,
+  );
+  DateTime lastThirdOfTheNight = tz.TZDateTime.from(
+    sunnahTimes.lastThirdOfTheNight,
+    location,
+  );
 
   // Qibla Direction
   var qiblaDirection = Qibla.qibla(coordinates);

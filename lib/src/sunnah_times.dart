@@ -22,36 +22,54 @@ class SunnahTimes {
   static CalculationMethod? _cachedMethod;
   final DateTime middleOfTheNight;
   final DateTime lastThirdOfTheNight;
-  
+
   SunnahTimes(PrayerTimes prayerTimes, {bool roundToMinutes = true})
-      : middleOfTheNight = _calculateMiddleOfNight(prayerTimes, roundToMinutes),
-        lastThirdOfTheNight =
-            _calculateLastThirdOfNight(prayerTimes, roundToMinutes);
+    : middleOfTheNight = _calculateMiddleOfNight(prayerTimes, roundToMinutes),
+      lastThirdOfTheNight = _calculateLastThirdOfNight(
+        prayerTimes,
+        roundToMinutes,
+      );
 
   static DateTime _calculateLastThirdOfNight(
-      PrayerTimes prayerTimes, bool roundToMinutes) {
-    final nextDayPrayerTimes =
-        _getNextDayPrayerTimes(prayerTimes, roundToMinutes);
-    final Duration nightDuration =
-        nextDayPrayerTimes.fajr.difference(prayerTimes.maghrib);
+    PrayerTimes prayerTimes,
+    bool roundToMinutes,
+  ) {
+    final nextDayPrayerTimes = _getNextDayPrayerTimes(
+      prayerTimes,
+      roundToMinutes,
+    );
+    final Duration nightDuration = nextDayPrayerTimes.fajr.difference(
+      prayerTimes.maghrib,
+    );
     return prayerTimes.maghrib
         .addSeconds((nightDuration.inSeconds * (2 / 3)).floor())
-        .roundedMinute(rounding: roundToMinutes ? Rounding.nearest : Rounding.none);
+        .roundedMinute(
+          rounding: roundToMinutes ? Rounding.nearest : Rounding.none,
+        );
   }
 
   static DateTime _calculateMiddleOfNight(
-      PrayerTimes prayerTimes, bool roundToMinutes) {
-    final nextDayPrayerTimes =
-        _getNextDayPrayerTimes(prayerTimes, roundToMinutes);
-    final Duration nightDuration =
-        nextDayPrayerTimes.fajr.difference(prayerTimes.maghrib);
+    PrayerTimes prayerTimes,
+    bool roundToMinutes,
+  ) {
+    final nextDayPrayerTimes = _getNextDayPrayerTimes(
+      prayerTimes,
+      roundToMinutes,
+    );
+    final Duration nightDuration = nextDayPrayerTimes.fajr.difference(
+      prayerTimes.maghrib,
+    );
     return prayerTimes.maghrib
         .addSeconds((nightDuration.inSeconds / 2).floor())
-        .roundedMinute(rounding: roundToMinutes ? Rounding.nearest : Rounding.none);
+        .roundedMinute(
+          rounding: roundToMinutes ? Rounding.nearest : Rounding.none,
+        );
   }
 
   static PrayerTimes _getNextDayPrayerTimes(
-      PrayerTimes prayerTimes, bool roundToMinutes) {
+    PrayerTimes prayerTimes,
+    bool roundToMinutes,
+  ) {
     final nextDay = prayerTimes.date.addDays(1);
 
     // Simple cache check to avoid redundant calculations

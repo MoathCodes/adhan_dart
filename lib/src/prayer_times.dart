@@ -96,7 +96,8 @@ class PrayerTimes {
     SolarTime solarAfterAfter = SolarTime(dateAfter.addDays(1), coordinates);
 
     // 2. Resolve Invalid Times (Polar Circle / High Latitude)
-    bool needsResolution = solarToday.sunrise.isNaN ||
+    bool needsResolution =
+        solarToday.sunrise.isNaN ||
         solarToday.sunset.isNaN ||
         solarAfter.sunrise.isNaN ||
         solarAfter.sunset.isNaN ||
@@ -108,14 +109,26 @@ class PrayerTimes {
     }
 
     if (needsResolution || resolver != PolarCircleResolution.unresolved) {
-      final resolvedToday =
-          PolarCircleResolver.resolve(resolver, date, coordinates);
-      final resolvedBefore =
-          PolarCircleResolver.resolve(resolver, dateBefore, coordinates);
-      final resolvedAfter =
-          PolarCircleResolver.resolve(resolver, dateAfter, coordinates);
+      final resolvedToday = PolarCircleResolver.resolve(
+        resolver,
+        date,
+        coordinates,
+      );
+      final resolvedBefore = PolarCircleResolver.resolve(
+        resolver,
+        dateBefore,
+        coordinates,
+      );
+      final resolvedAfter = PolarCircleResolver.resolve(
+        resolver,
+        dateAfter,
+        coordinates,
+      );
       final resolvedAfterAfter = PolarCircleResolver.resolve(
-          resolver, dateAfter.addDays(1), coordinates);
+        resolver,
+        dateAfter.addDays(1),
+        coordinates,
+      );
 
       solarToday = resolvedToday.solarTime;
       solarBefore = resolvedBefore.solarTime;
@@ -125,8 +138,10 @@ class PrayerTimes {
 
     // 3. Fallback for Extreme Failures
     if (solarToday.sunrise.isNaN || solarToday.sunset.isNaN) {
-      final safeCoords =
-          Coordinates(45.0 * coordinates.latitude.sign, coordinates.longitude);
+      final safeCoords = Coordinates(
+        45.0 * coordinates.latitude.sign,
+        coordinates.longitude,
+      );
       solarToday = SolarTime(date, safeCoords);
       solarBefore = SolarTime(dateBefore, safeCoords);
       solarAfter = SolarTime(dateAfter, safeCoords);
@@ -136,55 +151,73 @@ class PrayerTimes {
     // 4. Calculate Core Times
     final shadowLengthValue = shadowLength(calculationMethod.madhab);
 
-    DateTime dhuhrTime = TimeComponents(solarToday.transit)
-        .utcDate(date.year, date.month, date.day);
+    DateTime dhuhrTime = TimeComponents(
+      solarToday.transit,
+    ).utcDate(date.year, date.month, date.day);
 
-    DateTime sunriseTime = TimeComponents(solarToday.sunrise)
-        .utcDate(date.year, date.month, date.day);
-    DateTime sunsetTime = TimeComponents(solarToday.sunset)
-        .utcDate(date.year, date.month, date.day);
+    DateTime sunriseTime = TimeComponents(
+      solarToday.sunrise,
+    ).utcDate(date.year, date.month, date.day);
+    DateTime sunsetTime = TimeComponents(
+      solarToday.sunset,
+    ).utcDate(date.year, date.month, date.day);
 
     double asrAngleTime = solarToday.afternoon(shadowLengthValue);
     if (asrAngleTime.isNaN) {
-      final safeSolar = SolarTime(date,
-          Coordinates(45.0 * coordinates.latitude.sign, coordinates.longitude));
+      final safeSolar = SolarTime(
+        date,
+        Coordinates(45.0 * coordinates.latitude.sign, coordinates.longitude),
+      );
       asrAngleTime = safeSolar.afternoon(shadowLengthValue);
     }
-    DateTime asrTime = TimeComponents(asrAngleTime)
-        .utcDate(date.year, date.month, date.day);
+    DateTime asrTime = TimeComponents(
+      asrAngleTime,
+    ).utcDate(date.year, date.month, date.day);
 
-    DateTime sunriseAfterTime = TimeComponents(solarAfter.sunrise)
-        .utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
-    DateTime sunsetBeforeTime = TimeComponents(solarBefore.sunset)
-        .utcDate(dateBefore.year, dateBefore.month, dateBefore.day);
-    DateTime sunsetAfterTime = TimeComponents(solarAfter.sunset)
-        .utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
-    DateTime sunriseAfterAfterTime = TimeComponents(solarAfterAfter.sunrise)
-        .utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
+    DateTime sunriseAfterTime = TimeComponents(
+      solarAfter.sunrise,
+    ).utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
+    DateTime sunsetBeforeTime = TimeComponents(
+      solarBefore.sunset,
+    ).utcDate(dateBefore.year, dateBefore.month, dateBefore.day);
+    DateTime sunsetAfterTime = TimeComponents(
+      solarAfter.sunset,
+    ).utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
+    DateTime sunriseAfterAfterTime = TimeComponents(
+      solarAfterAfter.sunrise,
+    ).utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
 
     final int nightSeconds = sunriseAfterTime.difference(sunsetTime).inSeconds;
-    final int nightSecondsBefore =
-        sunriseTime.difference(sunsetBeforeTime).inSeconds;
-    final int nightSecondsAfter =
-        sunriseAfterAfterTime.difference(sunsetAfterTime).inSeconds;
+    final int nightSecondsBefore = sunriseTime
+        .difference(sunsetBeforeTime)
+        .inSeconds;
+    final int nightSecondsAfter = sunriseAfterAfterTime
+        .difference(sunsetAfterTime)
+        .inSeconds;
 
     // 5. Calculate Prayers
     DateTime maghribTime = sunsetTime;
 
     DateTime? fajrTime;
-    double fajrAngleTime =
-        solarToday.hourAngle(-1 * calculationMethod.fajrAngle, false);
+    double fajrAngleTime = solarToday.hourAngle(
+      -1 * calculationMethod.fajrAngle,
+      false,
+    );
     if (!fajrAngleTime.isNaN) {
-      fajrTime = TimeComponents(fajrAngleTime)
-          .utcDate(date.year, date.month, date.day);
+      fajrTime = TimeComponents(
+        fajrAngleTime,
+      ).utcDate(date.year, date.month, date.day);
     }
 
     DateTime? fajrAfterTime;
-    double fajrAfterAngleTime =
-        solarAfter.hourAngle(-1 * calculationMethod.fajrAngle, false);
+    double fajrAfterAngleTime = solarAfter.hourAngle(
+      -1 * calculationMethod.fajrAngle,
+      false,
+    );
     if (!fajrAfterAngleTime.isNaN) {
-      fajrAfterTime = TimeComponents(fajrAfterAngleTime)
-          .utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
+      fajrAfterTime = TimeComponents(
+        fajrAfterAngleTime,
+      ).utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
     }
 
     DateTime? ishaTime;
@@ -192,24 +225,32 @@ class PrayerTimes {
         calculationMethod.ishaInterval! > 0) {
       ishaTime = sunsetTime.addMinutes(calculationMethod.ishaInterval!);
     } else {
-      double ishaAngleTime =
-          solarToday.hourAngle(-1 * calculationMethod.ishaAngle, true);
+      double ishaAngleTime = solarToday.hourAngle(
+        -1 * calculationMethod.ishaAngle,
+        true,
+      );
       if (!ishaAngleTime.isNaN) {
-        ishaTime = TimeComponents(ishaAngleTime)
-            .utcDate(date.year, date.month, date.day);
+        ishaTime = TimeComponents(
+          ishaAngleTime,
+        ).utcDate(date.year, date.month, date.day);
       }
     }
 
     DateTime? ishaBeforeTime;
     if (calculationMethod.ishaInterval != null &&
         calculationMethod.ishaInterval! > 0) {
-      ishaBeforeTime = sunsetBeforeTime.addMinutes(calculationMethod.ishaInterval!);
+      ishaBeforeTime = sunsetBeforeTime.addMinutes(
+        calculationMethod.ishaInterval!,
+      );
     } else {
-      double ishaBeforeAngleTime =
-          solarBefore.hourAngle(-1 * calculationMethod.ishaAngle, true);
+      double ishaBeforeAngleTime = solarBefore.hourAngle(
+        -1 * calculationMethod.ishaAngle,
+        true,
+      );
       if (!ishaBeforeAngleTime.isNaN) {
-        ishaBeforeTime = TimeComponents(ishaBeforeAngleTime)
-            .utcDate(dateBefore.year, dateBefore.month, dateBefore.day);
+        ishaBeforeTime = TimeComponents(
+          ishaBeforeAngleTime,
+        ).utcDate(dateBefore.year, dateBefore.month, dateBefore.day);
       }
     }
 
@@ -217,10 +258,19 @@ class PrayerTimes {
 
     DateTime seasonAdjustedMorning(DateTime sunrise) =>
         Astronomical.seasonAdjustedMorningTwilight(
-            coordinates.latitude, date.dayOfYear, date.year, sunrise);
+          coordinates.latitude,
+          date.dayOfYear,
+          date.year,
+          sunrise,
+        );
     DateTime seasonAdjustedEvening(DateTime sunset) =>
-        Astronomical.seasonAdjustedEveningTwilight(coordinates.latitude,
-            date.dayOfYear, date.year, sunset, calculationMethod.shafaq);
+        Astronomical.seasonAdjustedEveningTwilight(
+          coordinates.latitude,
+          date.dayOfYear,
+          date.year,
+          sunset,
+          calculationMethod.shafaq,
+        );
 
     DateTime computeSafeFajr(DateTime sunrise, int nightSecs) {
       if (calculationMethod is MoonsightingCommittee) {
@@ -255,8 +305,9 @@ class PrayerTimes {
       }
 
       final double fractionAfter = nightSecondsAfter / 7;
-      final fallbackFajrAfter =
-          sunriseAfterTime.addSeconds(-fractionAfter.round());
+      final fallbackFajrAfter = sunriseAfterTime.addSeconds(
+        -fractionAfter.round(),
+      );
       if (fajrAfterTime == null ||
           fajrAfterTime.isAfter(sunriseAfterTime) ||
           fajrAfterTime.difference(sunriseAfterTime).inMinutes > 300) {
@@ -297,8 +348,10 @@ class PrayerTimes {
       estimated.add(Prayer.isha);
     }
 
-    final safeIshaBefore =
-        computeSafeIsha(sunsetBeforeTime, nightSecondsBefore);
+    final safeIshaBefore = computeSafeIsha(
+      sunsetBeforeTime,
+      nightSecondsBefore,
+    );
     if (ishaBeforeTime == null || !ishaBeforeTime.isAfter(sunsetBeforeTime)) {
       ishaBeforeTime = safeIshaBefore;
     } else if (safeIshaBefore.isBefore(ishaBeforeTime)) {
@@ -307,10 +360,13 @@ class PrayerTimes {
 
     if (calculationMethod.maghribAngle != null) {
       double maghribAngleTime = solarToday.hourAngle(
-          -1 * calculationMethod.maghribAngle!, true);
+        -1 * calculationMethod.maghribAngle!,
+        true,
+      );
       if (!maghribAngleTime.isNaN) {
-        final DateTime angleBasedMaghrib = TimeComponents(maghribAngleTime)
-            .utcDate(date.year, date.month, date.day);
+        final DateTime angleBasedMaghrib = TimeComponents(
+          maghribAngleTime,
+        ).utcDate(date.year, date.month, date.day);
         if (maghribTime.isBefore(angleBasedMaghrib) &&
             ishaTime.isAfter(angleBasedMaghrib)) {
           maghribTime = angleBasedMaghrib;
@@ -319,19 +375,23 @@ class PrayerTimes {
     }
 
     // 6. Final Adjustments
-    final int fajrAdj = (calculationMethod.adjustments[Prayer.fajr] ?? 0) +
+    final int fajrAdj =
+        (calculationMethod.adjustments[Prayer.fajr] ?? 0) +
         (calculationMethod.methodAdjustments[Prayer.fajr] ?? 0);
     final int sunriseAdj =
         (calculationMethod.adjustments[Prayer.sunrise] ?? 0) +
-            (calculationMethod.methodAdjustments[Prayer.sunrise] ?? 0);
-    final int dhuhrAdj = (calculationMethod.adjustments[Prayer.dhuhr] ?? 0) +
+        (calculationMethod.methodAdjustments[Prayer.sunrise] ?? 0);
+    final int dhuhrAdj =
+        (calculationMethod.adjustments[Prayer.dhuhr] ?? 0) +
         (calculationMethod.methodAdjustments[Prayer.dhuhr] ?? 0);
-    final int asrAdj = (calculationMethod.adjustments[Prayer.asr] ?? 0) +
+    final int asrAdj =
+        (calculationMethod.adjustments[Prayer.asr] ?? 0) +
         (calculationMethod.methodAdjustments[Prayer.asr] ?? 0);
     final int maghribAdj =
         (calculationMethod.adjustments[Prayer.maghrib] ?? 0) +
-            (calculationMethod.methodAdjustments[Prayer.maghrib] ?? 0);
-    final int ishaAdj = (calculationMethod.adjustments[Prayer.isha] ?? 0) +
+        (calculationMethod.methodAdjustments[Prayer.maghrib] ?? 0);
+    final int ishaAdj =
+        (calculationMethod.adjustments[Prayer.isha] ?? 0) +
         (calculationMethod.methodAdjustments[Prayer.isha] ?? 0);
 
     return PrayerTimes._(
@@ -339,54 +399,92 @@ class PrayerTimes {
       coordinates: coordinates,
       calculationMethod: calculationMethod,
       fajr: _adjust(
-          fajrTime, fajrAdj, roundToMinutes, calculationMethod.rounding),
+        fajrTime,
+        fajrAdj,
+        roundToMinutes,
+        calculationMethod.rounding,
+      ),
       sunrise: _adjust(
-          sunriseTime, sunriseAdj, roundToMinutes, calculationMethod.rounding),
+        sunriseTime,
+        sunriseAdj,
+        roundToMinutes,
+        calculationMethod.rounding,
+      ),
       dhuhr: _adjust(
-          dhuhrTime, dhuhrAdj, roundToMinutes, calculationMethod.rounding),
-      asr: _adjust(
-          asrTime, asrAdj, roundToMinutes, calculationMethod.rounding),
-      maghrib: _adjust(maghribTime, maghribAdj, roundToMinutes,
-          calculationMethod.rounding),
+        dhuhrTime,
+        dhuhrAdj,
+        roundToMinutes,
+        calculationMethod.rounding,
+      ),
+      asr: _adjust(asrTime, asrAdj, roundToMinutes, calculationMethod.rounding),
+      maghrib: _adjust(
+        maghribTime,
+        maghribAdj,
+        roundToMinutes,
+        calculationMethod.rounding,
+      ),
       isha: _adjust(
-          ishaTime, ishaAdj, roundToMinutes, calculationMethod.rounding),
-      ishaBefore: _adjust(ishaBeforeTime, ishaAdj, roundToMinutes,
-          calculationMethod.rounding),
-      fajrAfter: _adjust(fajrAfterTime, fajrAdj, roundToMinutes,
-          calculationMethod.rounding),
+        ishaTime,
+        ishaAdj,
+        roundToMinutes,
+        calculationMethod.rounding,
+      ),
+      ishaBefore: _adjust(
+        ishaBeforeTime,
+        ishaAdj,
+        roundToMinutes,
+        calculationMethod.rounding,
+      ),
+      fajrAfter: _adjust(
+        fajrAfterTime,
+        fajrAdj,
+        roundToMinutes,
+        calculationMethod.rounding,
+      ),
       estimatedPrayers: estimated,
     );
   }
 
   static DateTime _adjust(
-      DateTime time, int minutes, bool round, Rounding rounding) {
+    DateTime time,
+    int minutes,
+    bool round,
+    Rounding rounding,
+  ) {
     final adjusted = time.addMinutes(minutes);
     return round ? adjusted.roundedMinute(rounding: rounding) : adjusted;
   }
 
   static void _validateInputs(
-      Coordinates coordinates, CalculationMethod method) {
+    Coordinates coordinates,
+    CalculationMethod method,
+  ) {
     if (coordinates.latitude.abs() > 90) {
       throw ArgumentError(
-          'Latitude must be between -90 and 90 degrees, got ${coordinates.latitude}');
+        'Latitude must be between -90 and 90 degrees, got ${coordinates.latitude}',
+      );
     }
     if (coordinates.longitude.abs() > 180) {
       throw ArgumentError(
-          'Longitude must be between -180 and 180 degrees, got ${coordinates.longitude}');
+        'Longitude must be between -180 and 180 degrees, got ${coordinates.longitude}',
+      );
     }
     if (method.fajrAngle <= 0 || method.fajrAngle > 30) {
       throw ArgumentError(
-          'Fajr angle must be between 0 and 30 degrees, got ${method.fajrAngle}');
+        'Fajr angle must be between 0 and 30 degrees, got ${method.fajrAngle}',
+      );
     }
     if (method.ishaInterval == null || method.ishaInterval! <= 0) {
       if (method.ishaAngle <= 0 || method.ishaAngle > 30) {
         throw ArgumentError(
-            'Isha angle must be between 0 and 30 degrees when not using interval, got ${method.ishaAngle}');
+          'Isha angle must be between 0 and 30 degrees when not using interval, got ${method.ishaAngle}',
+        );
       }
     }
     if (method.ishaInterval != null && method.ishaInterval! < 0) {
       throw ArgumentError(
-          'Isha interval must be positive, got ${method.ishaInterval}');
+        'Isha interval must be positive, got ${method.ishaInterval}',
+      );
     }
   }
 
@@ -468,16 +566,16 @@ class PrayerTimes {
 
   @override
   int get hashCode => Object.hash(
-        date,
-        coordinates,
-        calculationMethod,
-        fajr,
-        sunrise,
-        dhuhr,
-        asr,
-        maghrib,
-        isha,
-      );
+    date,
+    coordinates,
+    calculationMethod,
+    fajr,
+    sunrise,
+    dhuhr,
+    asr,
+    maghrib,
+    isha,
+  );
 
   @override
   String toString() {

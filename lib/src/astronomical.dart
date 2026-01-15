@@ -5,19 +5,25 @@ import 'package:adhan_dart/src/extensions.dart';
 
 class Astronomical {
   static double altitudeOfCelestialBody(
-      observerLatitude, declination, localHourAngle) {
+    observerLatitude,
+    declination,
+    localHourAngle,
+  ) {
     final phi = observerLatitude;
     final delta = declination;
     final H = localHourAngle;
     final term1 = sin(degreesToRadians(phi)) * sin(degreesToRadians(delta));
-    final term2 = cos(degreesToRadians(phi)) *
+    final term2 =
+        cos(degreesToRadians(phi)) *
         cos(degreesToRadians(delta)) *
         cos(degreesToRadians(H));
     return radiansToDegrees(asin(term1 + term2));
   }
 
   static double apparentObliquityOfTheEcliptic(
-      julianCentury, meanObliquityOfTheEcliptic) {
+    julianCentury,
+    meanObliquityOfTheEcliptic,
+  ) {
     final T = julianCentury;
     final epsilon0 = meanObliquityOfTheEcliptic;
     final O = 125.04 - (1934.136 * T);
@@ -27,9 +33,12 @@ class Astronomical {
   static double apparentSolarLongitude(julianCentury, meanLongitude) {
     final T = julianCentury;
     final l0 = meanLongitude;
-    final longitude = l0 +
+    final longitude =
+        l0 +
         Astronomical.solarEquationOfTheCenter(
-            T, Astronomical.meanSolarAnomaly(T));
+          T,
+          Astronomical.meanSolarAnomaly(T),
+        );
     final omega = 125.04 - (1934.136 * T);
     final lambda =
         longitude - 0.00569 - (0.00478 * sin(degreesToRadians(omega)));
@@ -78,7 +87,8 @@ class Astronomical {
     final d3 = nextDeclination as double;
 
     final lw = coordinates.longitude * -1;
-    final term1 = sin(degreesToRadians(h02)) -
+    final term1 =
+        sin(degreesToRadians(h02)) -
         (sin(degreesToRadians(coordinates.latitude)) *
             sin(degreesToRadians(d2)));
     final term2 =
@@ -91,10 +101,14 @@ class Astronomical {
     final a = unwindAngle(Astronomical.interpolateAngles(a2, a1, a3, m)!);
     final delta = Astronomical.interpolate(d2, d1, d3, m)!;
     final H = (theta - lw - a);
-    final h =
-        Astronomical.altitudeOfCelestialBody(coordinates.latitude, delta, H);
+    final h = Astronomical.altitudeOfCelestialBody(
+      coordinates.latitude,
+      delta,
+      H,
+    );
     final term3 = h - h02;
-    final term4 = 360 *
+    final term4 =
+        360 *
         cos(degreesToRadians(delta)) *
         cos(degreesToRadians(coordinates.latitude)) *
         sin(degreesToRadians(H));
@@ -102,8 +116,14 @@ class Astronomical {
     return (m + dm) * 24;
   }
 
-  static double correctedTransit(approximateTransit, longitude, siderealTime,
-      rightAscension, previousRightAscension, nextRightAscension) {
+  static double correctedTransit(
+    approximateTransit,
+    longitude,
+    siderealTime,
+    rightAscension,
+    previousRightAscension,
+    nextRightAscension,
+  ) {
     final m0 = approximateTransit;
     final L = longitude;
     final theta0 = siderealTime;
@@ -221,7 +241,11 @@ class Astronomical {
   }
 
   static double nutationInLongitude(
-      julianCentury, solarLongitude, lunarLongitude, ascendingNode) {
+    julianCentury,
+    solarLongitude,
+    lunarLongitude,
+    ascendingNode,
+  ) {
     final l0 = solarLongitude;
     final lp = lunarLongitude;
     final omega = ascendingNode;
@@ -233,7 +257,11 @@ class Astronomical {
   }
 
   static double nutationInObliquity(
-      julianCentury, solarLongitude, lunarLongitude, ascendingNode) {
+    julianCentury,
+    solarLongitude,
+    lunarLongitude,
+    ascendingNode,
+  ) {
     final l0 = solarLongitude;
     final lp = lunarLongitude;
     final omega = ascendingNode;
@@ -245,7 +273,12 @@ class Astronomical {
   }
 
   static DateTime seasonAdjustedEveningTwilight(
-      double latitude, int dayOfYear, int year, DateTime sunset, Shafaq shafaq) {
+    double latitude,
+    int dayOfYear,
+    int year,
+    DateTime sunset,
+    Shafaq shafaq,
+  ) {
     late double a, b, c, d;
 
     if (shafaq == Shafaq.ahmer) {
@@ -286,7 +319,11 @@ class Astronomical {
   }
 
   static DateTime seasonAdjustedMorningTwilight(
-      double latitude, int dayOfYear, int year, DateTime sunrise) {
+    double latitude,
+    int dayOfYear,
+    int year,
+    DateTime sunrise,
+  ) {
     final a = 75 + ((28.65 / 55.0) * (latitude).abs());
     final b = 75 + ((19.44 / 55.0) * (latitude).abs());
     final c = 75 + ((32.74 / 55.0) * (latitude).abs());

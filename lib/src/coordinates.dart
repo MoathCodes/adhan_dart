@@ -9,10 +9,14 @@ class Coordinates {
   final double longitude;
 
   const Coordinates(this.latitude, this.longitude)
-      : assert(latitude >= -90 && latitude <= 90,
-            'Latitude must be between -90 and 90 degrees'),
-        assert(longitude >= -180 && longitude <= 180,
-            'Longitude must be between -180 and 180 degrees');
+    : assert(
+        latitude >= -90 && latitude <= 90,
+        'Latitude must be between -90 and 90 degrees',
+      ),
+      assert(
+        longitude >= -180 && longitude <= 180,
+        'Longitude must be between -180 and 180 degrees',
+      );
 
   factory Coordinates.fromJson(Map<String, dynamic> data) {
     return Coordinates(data['latitude'], data['longitude']);
@@ -22,11 +26,13 @@ class Coordinates {
   factory Coordinates.validated(double latitude, double longitude) {
     if (latitude < -90 || latitude > 90) {
       throw ArgumentError(
-          'Latitude must be between -90 and 90 degrees, got: $latitude');
+        'Latitude must be between -90 and 90 degrees, got: $latitude',
+      );
     }
     if (longitude < -180 || longitude > 180) {
       throw ArgumentError(
-          'Longitude must be between -180 and 180 degrees, got: $longitude');
+        'Longitude must be between -180 and 180 degrees, got: $longitude',
+      );
     }
     return Coordinates(latitude, longitude);
   }
@@ -50,14 +56,8 @@ class Coordinates {
   }
 
   /// Creates a copy of this Coordinates with the given fields replaced with new values
-  Coordinates copyWith({
-    double? latitude,
-    double? longitude,
-  }) {
-    return Coordinates(
-      latitude ?? this.latitude,
-      longitude ?? this.longitude,
-    );
+  Coordinates copyWith({double? latitude, double? longitude}) {
+    return Coordinates(latitude ?? this.latitude, longitude ?? this.longitude);
   }
 
   @override
@@ -67,7 +67,7 @@ class Coordinates {
   static Map<String, dynamic> toJson(Coordinates coordinates) {
     return {
       'latitude': coordinates.latitude,
-      'longitude': coordinates.longitude
+      'longitude': coordinates.longitude,
     };
   }
 }

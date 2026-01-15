@@ -28,13 +28,13 @@ extension PrayerTimesUtilities on PrayerTimes {
   /// }
   /// ```
   Map<Prayer, DateTime> get allPrayerTimes => {
-        Prayer.fajr: fajr,
-        Prayer.sunrise: sunrise,
-        Prayer.dhuhr: dhuhr,
-        Prayer.asr: asr,
-        Prayer.maghrib: maghrib,
-        Prayer.isha: isha,
-      };
+    Prayer.fajr: fajr,
+    Prayer.sunrise: sunrise,
+    Prayer.dhuhr: dhuhr,
+    Prayer.asr: asr,
+    Prayer.maghrib: maghrib,
+    Prayer.isha: isha,
+  };
 
   /// Gets the duration of the day (from Fajr to Maghrib)
   Duration get dayDuration {
@@ -63,12 +63,12 @@ extension PrayerTimesUtilities on PrayerTimes {
   /// }
   /// ```
   Map<Prayer, DateTime> get obligatoryPrayerTimes => {
-        Prayer.fajr: fajr,
-        Prayer.dhuhr: dhuhr,
-        Prayer.asr: asr,
-        Prayer.maghrib: maghrib,
-        Prayer.isha: isha,
-      };
+    Prayer.fajr: fajr,
+    Prayer.dhuhr: dhuhr,
+    Prayer.asr: asr,
+    Prayer.maghrib: maghrib,
+    Prayer.isha: isha,
+  };
 
   /// Formats prayer times for display
   ///
@@ -82,8 +82,10 @@ extension PrayerTimesUtilities on PrayerTimes {
   /// // Dhuhr: 12:30
   /// // ...
   /// ```
-  String formatForDisplay(
-      {bool includeDate = true, bool include24Hour = true}) {
+  String formatForDisplay({
+    bool includeDate = true,
+    bool include24Hour = true,
+  }) {
     final buffer = StringBuffer();
 
     if (includeDate) {
@@ -229,7 +231,11 @@ extension PrayerTimeUtilities on DateTime {
 
     final prayerTime = prayerTimes.timeForPrayer(prayer);
     final nextPrayerTime = _getNextPrayerTime(
-        prayer, prayerTimes, coordinates, calculationMethod);
+      prayer,
+      prayerTimes,
+      coordinates,
+      calculationMethod,
+    );
 
     return isAfter(prayerTime) && isBefore(nextPrayerTime);
   }
@@ -255,8 +261,12 @@ extension PrayerTimeUtilities on DateTime {
     return nextPrayer.time.difference(this);
   }
 
-  DateTime _getNextPrayerTime(Prayer prayer, PrayerTimes prayerTimes,
-      Coordinates coordinates, CalculationMethod calculationMethod) {
+  DateTime _getNextPrayerTime(
+    Prayer prayer,
+    PrayerTimes prayerTimes,
+    Coordinates coordinates,
+    CalculationMethod calculationMethod,
+  ) {
     switch (prayer) {
       case Prayer.fajr:
         return prayerTimes.dhuhr;

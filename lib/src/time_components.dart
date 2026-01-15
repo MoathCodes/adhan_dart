@@ -8,14 +8,15 @@ class TimeComponents {
   final int seconds;
 
   TimeComponents(double number)
-      : hours = number.floor(),
-        minutes = ((number - number.floor()) * 60).floor(),
-        seconds = ((number -
-                    (number.floor() +
-                        ((number - number.floor()) * 60).floor() / 60)) *
-                60 *
-                60)
-            .floor();
+    : hours = number.floor(),
+      minutes = ((number - number.floor()) * 60).floor(),
+      seconds =
+          ((number -
+                      (number.floor() +
+                          ((number - number.floor()) * 60).floor() / 60)) *
+                  60 *
+                  60)
+              .floor();
 
   DateTime utcDate(year, month, date) {
     return DateTime.utc(year, month, date, hours, minutes, seconds);

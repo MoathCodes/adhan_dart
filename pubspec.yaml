@@ -15,3 +15,4 @@ dev_dependencies:
     timezone: ^0.10.1
     flutter_lints: ^6.0.0
     test: ^1.26.3
+    json_serializable: ^6.11.4
