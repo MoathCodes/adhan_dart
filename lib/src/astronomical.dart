@@ -1,13 +1,14 @@
 import 'dart:math';
 
+import 'package:adhan_dart/src/coordinates.dart';
 import 'package:adhan_dart/src/shafaq.dart';
 import 'package:adhan_dart/src/extensions.dart';
 
 class Astronomical {
   static double altitudeOfCelestialBody(
-    observerLatitude,
-    declination,
-    localHourAngle,
+    double observerLatitude,
+    double declination,
+    double localHourAngle,
   ) {
     final phi = observerLatitude;
     final delta = declination;
@@ -21,8 +22,8 @@ class Astronomical {
   }
 
   static double apparentObliquityOfTheEcliptic(
-    julianCentury,
-    meanObliquityOfTheEcliptic,
+    double julianCentury,
+    double meanObliquityOfTheEcliptic,
   ) {
     final T = julianCentury;
     final epsilon0 = meanObliquityOfTheEcliptic;
@@ -30,7 +31,10 @@ class Astronomical {
     return epsilon0 + (0.00256 * cos(degreesToRadians(O)));
   }
 
-  static double apparentSolarLongitude(julianCentury, meanLongitude) {
+  static double apparentSolarLongitude(
+    double julianCentury,
+    double meanLongitude,
+  ) {
     final T = julianCentury;
     final l0 = meanLongitude;
     final longitude =
@@ -45,12 +49,28 @@ class Astronomical {
     return unwindAngle(lambda);
   }
 
-  static double approximateTransit(longitude, siderealTime, rightAscension) {
+  static double approximateTransit(
+    double longitude,
+    double siderealTime,
+    double rightAscension,
+  ) {
     final L = longitude;
     final theta0 = siderealTime;
     final a2 = rightAscension;
     final lw = L * -1;
-    return normalizeToScale((a2 + lw - theta0) / 360, 1);
+    final m0 = normalizeToScale((a2 + lw - theta0) / 360, 1);
+    // For locations near the International Date Line, normalizeToScale can
+    // produce an m0 for the wrong calendar date. Compare m0 to a generalized
+    // transit time based on longitude; if they differ by more than half a day,
+    // m0 is off by one cycle and we adjust in the correct direction.
+    final expectedTransit = normalizeToScale((12.0 - L / 15.0) / 24.0, 1);
+    if (m0 - expectedTransit > 0.5) {
+      return m0 - 1.0;
+    } else if (expectedTransit - m0 > 0.5) {
+      return m0 + 1.0;
+    } else {
+      return m0;
+    }
   }
 
   static double ascendingLunarNodeLongitude(double julianCentury) {
@@ -64,27 +84,27 @@ class Astronomical {
   }
 
   static double correctedHourAngle(
-    approximateTransit,
-    angle,
-    coordinates,
-    afterTransit,
-    siderealTime,
-    rightAscension,
-    previousRightAscension,
-    nextRightAscension,
-    declination,
-    previousDeclination,
-    nextDeclination,
+    double approximateTransit,
+    double angle,
+    Coordinates coordinates,
+    bool afterTransit,
+    double siderealTime,
+    double rightAscension,
+    double previousRightAscension,
+    double nextRightAscension,
+    double declination,
+    double previousDeclination,
+    double nextDeclination,
   ) {
-    final m0 = approximateTransit as double?;
-    final h02 = angle as double;
-    final theta0 = siderealTime as double;
-    final a2 = rightAscension as double;
-    final a1 = previousRightAscension as double?;
-    final a3 = nextRightAscension as double;
-    final d2 = declination as double;
-    final d1 = previousDeclination as double?;
-    final d3 = nextDeclination as double;
+    final m0 = approximateTransit;
+    final h02 = angle;
+    final theta0 = siderealTime;
+    final a2 = rightAscension;
+    final a1 = previousRightAscension;
+    final a3 = nextRightAscension;
+    final d2 = declination;
+    final d1 = previousDeclination;
+    final d3 = nextDeclination;
 
     final lw = coordinates.longitude * -1;
     final term1 =
@@ -96,7 +116,7 @@ class Astronomical {
 
     final h021 = radiansToDegrees(acos(term1 / term2));
 
-    final m = (afterTransit as bool) ? m0! + (h021 / 360) : m0! - (h021 / 360);
+    final m = afterTransit ? m0 + (h021 / 360) : m0 - (h021 / 360);
     final theta = unwindAngle((theta0 + (360.985647 * m)));
     final a = unwindAngle(Astronomical.interpolateAngles(a2, a1, a3, m)!);
     final delta = Astronomical.interpolate(d2, d1, d3, m)!;
@@ -117,12 +137,12 @@ class Astronomical {
   }
 
   static double correctedTransit(
-    approximateTransit,
-    longitude,
-    siderealTime,
-    rightAscension,
-    previousRightAscension,
-    nextRightAscension,
+    double approximateTransit,
+    double longitude,
+    double siderealTime,
+    double rightAscension,
+    double previousRightAscension,
+    double nextRightAscension,
   ) {
     final m0 = approximateTransit;
     final L = longitude;
@@ -158,21 +178,21 @@ class Astronomical {
     return daysSinceSolstice;
   }
 
-  static double? interpolate(y2, y1, y3, n) {
+  static double? interpolate(double y2, double y1, double y3, double n) {
     final a = y2 - y1;
     final b = y3 - y2;
     final c = b - a;
     return y2 + ((n / 2) * (a + b + (n * c)));
   }
 
-  static double? interpolateAngles(y2, y1, y3, n) {
+  static double? interpolateAngles(double y2, double y1, double y3, double n) {
     final a = unwindAngle(y2 - y1);
     final b = unwindAngle(y3 - y2);
     final c = b - a;
     return y2 + ((n / 2) * (a + b + (n * c)));
   }
 
-  static bool isLeapYear(year) {
+  static bool isLeapYear(int year) {
     if (year % 4 != 0) return false;
     if (year % 100 == 0 && year % 400 != 0) return false;
     return true;
@@ -181,9 +201,9 @@ class Astronomical {
   static double julianCentury(double julianDay) =>
       (julianDay - 2451545.0) / 36525;
 
-  static double julianDay(year, month, day, hours) {
+  static double julianDay(int year, int month, int day, [double? hours]) {
     hours ??= 0;
-    trunc(val) => val.truncate();
+    int trunc(num val) => val.truncate();
     final Y = trunc(month > 2 ? year : year - 1);
     final M = trunc(month > 2 ? month : month + 12);
     final D = day + (hours / 24);
@@ -241,10 +261,10 @@ class Astronomical {
   }
 
   static double nutationInLongitude(
-    julianCentury,
-    solarLongitude,
-    lunarLongitude,
-    ascendingNode,
+    double julianCentury,
+    double solarLongitude,
+    double lunarLongitude,
+    double ascendingNode,
   ) {
     final l0 = solarLongitude;
     final lp = lunarLongitude;
@@ -257,10 +277,10 @@ class Astronomical {
   }
 
   static double nutationInObliquity(
-    julianCentury,
-    solarLongitude,
-    lunarLongitude,
-    ascendingNode,
+    double julianCentury,
+    double solarLongitude,
+    double lunarLongitude,
+    double ascendingNode,
   ) {
     final l0 = solarLongitude;
     final lp = lunarLongitude;
@@ -349,7 +369,10 @@ class Astronomical {
     return sunrise.addSeconds((adjustment() * -60.0).round());
   }
 
-  static double solarEquationOfTheCenter(julianCentury, meanAnomaly) {
+  static double solarEquationOfTheCenter(
+    double julianCentury,
+    double meanAnomaly,
+  ) {
     final T = julianCentury;
     final mrad = degreesToRadians(meanAnomaly);
     final term1 =

@@ -19,7 +19,7 @@ void benchmarkBasicCalculations() {
   print('1️⃣  Basic Prayer Time Calculations');
   print('   Testing calculation speed...');
 
-  const coords = Coordinates(21.3891, 39.8579); // Mecca
+  final coords = Coordinates(21.3891, 39.8579); // Mecca
   final date = DateTime(2024, 6, 15);
   const params = UmmAlQura();
 
@@ -48,7 +48,7 @@ void benchmarkCachingEffectiveness() {
   print('4️⃣  Caching Effectiveness');
   print('   Testing repeated vs varied calculations...');
 
-  const coords = Coordinates(21.3891, 39.8579);
+  final coords = Coordinates(21.3891, 39.8579);
   final date = DateTime(2024, 6, 15);
   const params = UmmAlQura();
   const iterations = 50;
@@ -146,7 +146,7 @@ void benchmarkSunnahTimesOptimization() {
   print('2️⃣  SunnahTimes Caching Optimization');
   print('   Testing repeated SunnahTimes creation...');
 
-  const coords = Coordinates(21.3891, 39.8579);
+  final coords = Coordinates(21.3891, 39.8579);
   final date = DateTime(2024, 6, 15);
   const params = UmmAlQura();
 

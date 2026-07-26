@@ -8,22 +8,28 @@ class Coordinates {
   final double latitude;
   final double longitude;
 
-  const Coordinates(this.latitude, this.longitude)
-    : assert(
-        latitude >= -90 && latitude <= 90,
-        'Latitude must be between -90 and 90 degrees',
-      ),
-      assert(
-        longitude >= -180 && longitude <= 180,
-        'Longitude must be between -180 and 180 degrees',
-      );
+  const Coordinates._(this.latitude, this.longitude);
 
-  factory Coordinates.fromJson(Map<String, dynamic> data) {
-    return Coordinates(data['latitude'], data['longitude']);
+  factory Coordinates(double latitude, double longitude) {
+    _validate(latitude, longitude);
+    return Coordinates._(latitude, longitude);
   }
 
-  /// Create coordinates with validation
+  factory Coordinates.fromJson(Map<String, dynamic> data) {
+    return Coordinates(
+      (data['latitude'] as num).toDouble(),
+      (data['longitude'] as num).toDouble(),
+    );
+  }
+
+  /// Create coordinates with validation.
+  ///
+  /// Equivalent to [Coordinates].
   factory Coordinates.validated(double latitude, double longitude) {
+    return Coordinates(latitude, longitude);
+  }
+
+  static void _validate(double latitude, double longitude) {
     if (latitude < -90 || latitude > 90) {
       throw ArgumentError(
         'Latitude must be between -90 and 90 degrees, got: $latitude',
@@ -34,7 +40,6 @@ class Coordinates {
         'Longitude must be between -180 and 180 degrees, got: $longitude',
       );
     }
-    return Coordinates(latitude, longitude);
   }
 
   @override

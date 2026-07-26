@@ -7,21 +7,15 @@ void main() {
   print('1. Clearer API parameters:');
   final times = PrayerTimes(
     date: DateTime.now(),
-    coordinates: const Coordinates(40.7128, -74.0060), // NYC
+    coordinates: Coordinates(40.7128, -74.0060), // NYC
     calculationMethod: CalculationMethod.northAmerica,
     roundToMinutes: true, // Much clearer than precision: false
   );
   print('   ✅ roundToMinutes: true (was precision: false)');
 
   // 2. Convenient factory method
-  print('\n2. Convenient factory method:');
-  final quickTimes = PrayerTimes(
-    date: DateTime.now(),
-    coordinates: const Coordinates(40.7128, -74.0060), // NYC
-    calculationMethod: CalculationMethod.northAmerica,
-    roundToMinutes: true, // Much clearer than precision: false
-  );
-  print('   ✅ Simple one-liner for common usage');
+  print('\n2. PrayerTimes factory:');
+  print('   ✅ Named parameters: coordinates, date, calculationMethod');
 
   // 3. Estimation transparency
   print('\n3. Estimation transparency:');
@@ -56,7 +50,7 @@ void main() {
   print('\n6. High-latitude handling:');
   final polarTimes = PrayerTimes(
     date: DateTime(2024, 6, 21), // Summer solstice
-    coordinates: const Coordinates(64.1466, -21.9426), // Reykjavik
+    coordinates: Coordinates(64.1466, -21.9426), // Reykjavik
     calculationMethod: CalculationMethod.muslimWorldLeague,
   );
 

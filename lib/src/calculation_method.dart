@@ -6,6 +6,25 @@ import 'package:adhan_dart/src/rounding.dart';
 import 'package:adhan_dart/src/shafaq.dart';
 import 'package:equatable/equatable.dart';
 
+bool _prayerIntMapsEqual(Map<Prayer, int> a, Map<Prayer, int> b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+  for (final entry in a.entries) {
+    if (b[entry.key] != entry.value) return false;
+  }
+  return true;
+}
+
+/// Sentinel for [CalculationMethod.copyWith] to distinguish "omit" from "clear".
+const Object _copyWithUnset = Object();
+
+Map<Prayer, int> _mergePrayerIntMaps(
+  Map<Prayer, int> defaults,
+  Map<Prayer, int> overrides,
+) {
+  return {...defaults, ...overrides};
+}
+
 /// Sealed class representing a calculation method for prayer times.
 ///
 /// This replaces the old Enum + Parameters approach.
@@ -81,7 +100,7 @@ sealed class CalculationMethod with EquatableMixin {
       Prayer.maghrib: 0,
       Prayer.isha: 0,
     },
-    this.polarCircleResolution = PolarCircleResolution.aqrabBalad,
+    this.polarCircleResolution = PolarCircleResolution.unresolved,
     this.rounding = Rounding.nearest,
     this.shafaq = Shafaq.general,
   });
@@ -101,14 +120,17 @@ sealed class CalculationMethod with EquatableMixin {
     shafaq,
   ];
 
-  /// Creates a copy of this CalculationMethod with the given fields replaced with the new values.
+  /// Creates a copy of this CalculationMethod with the given fields replaced.
   ///
-  /// Returns a [CustomCalculationMethod] preserving the original values where not overridden.
+  /// Preserves the runtime type: preset subclasses stay the same subclass
+  /// (e.g. [MoonsightingCommittee.copyWith] remains [MoonsightingCommittee]).
+  ///
+  /// Pass `null` for [ishaInterval] or [maghribAngle] to clear those values.
   CalculationMethod copyWith({
     double? fajrAngle,
     double? ishaAngle,
-    int? ishaInterval,
-    double? maghribAngle,
+    Object? ishaInterval = _copyWithUnset,
+    Object? maghribAngle = _copyWithUnset,
     Madhab? madhab,
     HighLatitudeRule? highLatitudeRule,
     Map<Prayer, int>? adjustments,
@@ -117,20 +139,235 @@ sealed class CalculationMethod with EquatableMixin {
     Rounding? rounding,
     Shafaq? shafaq,
   }) {
-    return CustomCalculationMethod(
-      fajrAngle: fajrAngle ?? this.fajrAngle,
-      ishaAngle: ishaAngle ?? this.ishaAngle,
-      ishaInterval: ishaInterval ?? this.ishaInterval,
-      maghribAngle: maghribAngle ?? this.maghribAngle,
-      madhab: madhab ?? this.madhab,
-      highLatitudeRule: highLatitudeRule ?? this.highLatitudeRule,
-      adjustments: adjustments ?? this.adjustments,
-      methodAdjustments: methodAdjustments ?? this.methodAdjustments,
-      polarCircleResolution:
-          polarCircleResolution ?? this.polarCircleResolution,
-      rounding: rounding ?? this.rounding,
-      shafaq: shafaq ?? this.shafaq,
-    );
+    final nextFajr = fajrAngle ?? this.fajrAngle;
+    final nextIsha = ishaAngle ?? this.ishaAngle;
+    final nextIshaInterval = identical(ishaInterval, _copyWithUnset)
+        ? this.ishaInterval
+        : ishaInterval as int?;
+    final nextMaghribAngle = identical(maghribAngle, _copyWithUnset)
+        ? this.maghribAngle
+        : maghribAngle as double?;
+    final nextMadhab = madhab ?? this.madhab;
+    final nextHighLatitudeRule = highLatitudeRule ?? this.highLatitudeRule;
+    final nextAdjustments = adjustments ?? this.adjustments;
+    final nextMethodAdjustments =
+        methodAdjustments ?? this.methodAdjustments;
+    final nextPolarCircleResolution =
+        polarCircleResolution ?? this.polarCircleResolution;
+    final nextRounding = rounding ?? this.rounding;
+    final nextShafaq = shafaq ?? this.shafaq;
+
+    if (nextFajr == this.fajrAngle &&
+        nextIsha == this.ishaAngle &&
+        nextIshaInterval == this.ishaInterval &&
+        nextMaghribAngle == this.maghribAngle &&
+        nextMadhab == this.madhab &&
+        nextHighLatitudeRule == this.highLatitudeRule &&
+        _prayerIntMapsEqual(nextAdjustments, this.adjustments) &&
+        _prayerIntMapsEqual(nextMethodAdjustments, this.methodAdjustments) &&
+        nextPolarCircleResolution == this.polarCircleResolution &&
+        nextRounding == this.rounding &&
+        nextShafaq == this.shafaq) {
+      return this;
+    }
+
+    return switch (this) {
+      MuslimWorldLeague() => MuslimWorldLeague(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      Egyptian() => Egyptian(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      Karachi() => Karachi(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      UmmAlQura() => UmmAlQura(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      Dubai() => Dubai(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      MoonsightingCommittee() => MoonsightingCommittee(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      NorthAmerica() => NorthAmerica(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      Kuwait() => Kuwait(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      Qatar() => Qatar(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      Singapore() => Singapore(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      Tehran() => Tehran(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      Turkiye() => Turkiye(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      Morocco() => Morocco(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      OtherCalculationMethod() => OtherCalculationMethod(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+      CustomCalculationMethod() => CustomCalculationMethod(
+        fajrAngle: nextFajr,
+        ishaAngle: nextIsha,
+        ishaInterval: nextIshaInterval,
+        maghribAngle: nextMaghribAngle,
+        madhab: nextMadhab,
+        highLatitudeRule: nextHighLatitudeRule,
+        adjustments: nextAdjustments,
+        methodAdjustments: nextMethodAdjustments,
+        polarCircleResolution: nextPolarCircleResolution,
+        rounding: nextRounding,
+        shafaq: nextShafaq,
+      ),
+    };
   }
 
   Map<Prayer, double> nightPortions() {
@@ -183,12 +420,63 @@ sealed class CalculationMethod with EquatableMixin {
   factory CalculationMethod.fromJson(Map<String, dynamic> json) {
     final methodName = json['method'] as String?;
 
-    // Fast path: return preset if it's a known method
     if (methodName != null && _presetMethods.containsKey(methodName)) {
-      return _presetMethods[methodName]!;
+      final preset = _presetMethods[methodName]!;
+      final adjustmentsOverride = json.containsKey('adjustments')
+          ? (json['adjustments'] as Map<String, dynamic>).map(
+              (key, value) =>
+                  MapEntry(Prayer.values.byName(key), value as int),
+            )
+          : null;
+      final methodAdjustmentsOverride = json.containsKey('methodAdjustments')
+          ? (json['methodAdjustments'] as Map<String, dynamic>).map(
+              (key, value) =>
+                  MapEntry(Prayer.values.byName(key), value as int),
+            )
+          : null;
+
+      return preset.copyWith(
+        fajrAngle: json.containsKey('fajrAngle')
+            ? (json['fajrAngle'] as num).toDouble()
+            : null,
+        ishaAngle: json.containsKey('ishaAngle')
+            ? (json['ishaAngle'] as num).toDouble()
+            : null,
+        ishaInterval: json.containsKey('ishaInterval')
+            ? json['ishaInterval'] as int?
+            : _copyWithUnset,
+        maghribAngle: json.containsKey('maghribAngle')
+            ? (json['maghribAngle'] as num?)?.toDouble()
+            : _copyWithUnset,
+        madhab: json.containsKey('madhab')
+            ? Madhab.values.byName(json['madhab'] as String)
+            : null,
+        highLatitudeRule: json.containsKey('highLatitudeRule')
+            ? HighLatitudeRule.values.byName(json['highLatitudeRule'] as String)
+            : null,
+        adjustments: adjustmentsOverride == null
+            ? null
+            : _mergePrayerIntMaps(preset.adjustments, adjustmentsOverride),
+        methodAdjustments: methodAdjustmentsOverride == null
+            ? null
+            : _mergePrayerIntMaps(
+                preset.methodAdjustments,
+                methodAdjustmentsOverride,
+              ),
+        polarCircleResolution: json.containsKey('polarCircleResolution')
+            ? PolarCircleResolution.values.byName(
+                json['polarCircleResolution'] as String,
+              )
+            : null,
+        rounding: json.containsKey('rounding')
+            ? Rounding.values.byName(json['rounding'] as String)
+            : null,
+        shafaq: json.containsKey('shafaq')
+            ? Shafaq.values.byName(json['shafaq'] as String)
+            : null,
+      );
     }
 
-    // Slow path: parse all fields for custom methods
     return CustomCalculationMethod(
       fajrAngle: (json['fajrAngle'] as num).toDouble(),
       ishaAngle: (json['ishaAngle'] as num).toDouble(),
@@ -214,169 +502,295 @@ sealed class CalculationMethod with EquatableMixin {
   }
 }
 
+/// Placeholder for user-defined methods not covered by presets.
+///
+/// Default [fajrAngle] and [ishaAngle] are 0. Set valid angles via [copyWith]
+/// before constructing [PrayerTimes].
 class OtherCalculationMethod extends CalculationMethod {
-  const OtherCalculationMethod({super.fajrAngle = 0, super.ishaAngle = 0});
+  const OtherCalculationMethod({
+    super.fajrAngle = 0,
+    super.ishaAngle = 0,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments,
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class MuslimWorldLeague extends CalculationMethod {
-  const MuslimWorldLeague()
-    : super(
-        fajrAngle: 18.0,
-        ishaAngle: 17.0,
-        methodAdjustments: const {
-          Prayer.fajr: 0,
-          Prayer.sunrise: 0,
-          Prayer.dhuhr: 1,
-          Prayer.asr: 0,
-          Prayer.maghrib: 0,
-          Prayer.isha: 0,
-        },
-      );
+  const MuslimWorldLeague({
+    super.fajrAngle = 18.0,
+    super.ishaAngle = 17.0,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments = const {
+      Prayer.fajr: 0,
+      Prayer.sunrise: 0,
+      Prayer.dhuhr: 1,
+      Prayer.asr: 0,
+      Prayer.maghrib: 0,
+      Prayer.isha: 0,
+    },
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class Egyptian extends CalculationMethod {
-  const Egyptian()
-    : super(
-        fajrAngle: 19.5,
-        ishaAngle: 17.5,
-        methodAdjustments: const {
-          Prayer.fajr: 0,
-          Prayer.sunrise: 0,
-          Prayer.dhuhr: 1,
-          Prayer.asr: 0,
-          Prayer.maghrib: 0,
-          Prayer.isha: 0,
-        },
-      );
+  const Egyptian({
+    super.fajrAngle = 19.5,
+    super.ishaAngle = 17.5,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments = const {
+      Prayer.fajr: 0,
+      Prayer.sunrise: 0,
+      Prayer.dhuhr: 1,
+      Prayer.asr: 0,
+      Prayer.maghrib: 0,
+      Prayer.isha: 0,
+    },
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class Karachi extends CalculationMethod {
-  const Karachi()
-    : super(
-        fajrAngle: 18.0,
-        ishaAngle: 18.0,
-        methodAdjustments: const {
-          Prayer.fajr: 0,
-          Prayer.sunrise: 0,
-          Prayer.dhuhr: 1,
-          Prayer.asr: 0,
-          Prayer.maghrib: 0,
-          Prayer.isha: 0,
-        },
-      );
+  const Karachi({
+    super.fajrAngle = 18.0,
+    super.ishaAngle = 18.0,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments = const {
+      Prayer.fajr: 0,
+      Prayer.sunrise: 0,
+      Prayer.dhuhr: 1,
+      Prayer.asr: 0,
+      Prayer.maghrib: 0,
+      Prayer.isha: 0,
+    },
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class UmmAlQura extends CalculationMethod {
-  const UmmAlQura() : super(fajrAngle: 18.5, ishaAngle: 0.0, ishaInterval: 90);
+  const UmmAlQura({
+    super.fajrAngle = 18.5,
+    super.ishaAngle = 0.0,
+    super.ishaInterval = 90,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments,
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class Dubai extends CalculationMethod {
-  const Dubai()
-    : super(
-        fajrAngle: 18.2,
-        ishaAngle: 18.2,
-        methodAdjustments: const {
-          Prayer.fajr: 0,
-          Prayer.sunrise: -3,
-          Prayer.dhuhr: 3,
-          Prayer.asr: 3,
-          Prayer.maghrib: 3,
-          Prayer.isha: 0,
-        },
-      );
+  const Dubai({
+    super.fajrAngle = 18.2,
+    super.ishaAngle = 18.2,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments = const {
+      Prayer.fajr: 0,
+      Prayer.sunrise: -3,
+      Prayer.dhuhr: 3,
+      Prayer.asr: 3,
+      Prayer.maghrib: 3,
+      Prayer.isha: 0,
+    },
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class MoonsightingCommittee extends CalculationMethod {
-  const MoonsightingCommittee()
-    : super(
-        fajrAngle: 18.0,
-        ishaAngle: 18.0,
-        methodAdjustments: const {
-          Prayer.fajr: 0,
-          Prayer.sunrise: 0,
-          Prayer.dhuhr: 5,
-          Prayer.asr: 0,
-          Prayer.maghrib: 3,
-          Prayer.isha: 0,
-        },
-      );
+  const MoonsightingCommittee({
+    super.fajrAngle = 18.0,
+    super.ishaAngle = 18.0,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments = const {
+      Prayer.fajr: 0,
+      Prayer.sunrise: 0,
+      Prayer.dhuhr: 5,
+      Prayer.asr: 0,
+      Prayer.maghrib: 3,
+      Prayer.isha: 0,
+    },
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class NorthAmerica extends CalculationMethod {
-  const NorthAmerica()
-    : super(
-        fajrAngle: 15.0,
-        ishaAngle: 15.0,
-        methodAdjustments: const {
-          Prayer.fajr: 0,
-          Prayer.sunrise: 0,
-          Prayer.dhuhr: 1,
-          Prayer.asr: 0,
-          Prayer.maghrib: 0,
-          Prayer.isha: 0,
-        },
-      );
+  const NorthAmerica({
+    super.fajrAngle = 15.0,
+    super.ishaAngle = 15.0,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments = const {
+      Prayer.fajr: 0,
+      Prayer.sunrise: 0,
+      Prayer.dhuhr: 1,
+      Prayer.asr: 0,
+      Prayer.maghrib: 0,
+      Prayer.isha: 0,
+    },
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class Kuwait extends CalculationMethod {
-  const Kuwait() : super(fajrAngle: 18.0, ishaAngle: 17.5);
+  const Kuwait({
+    super.fajrAngle = 18.0,
+    super.ishaAngle = 17.5,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments,
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class Qatar extends CalculationMethod {
-  const Qatar() : super(fajrAngle: 18.0, ishaAngle: 0.0, ishaInterval: 90);
+  const Qatar({
+    super.fajrAngle = 18.0,
+    super.ishaAngle = 0.0,
+    super.ishaInterval = 90,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments,
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class Singapore extends CalculationMethod {
-  const Singapore()
-    : super(
-        fajrAngle: 20.0,
-        ishaAngle: 18.0,
-        methodAdjustments: const {
-          Prayer.fajr: 0,
-          Prayer.sunrise: 0,
-          Prayer.dhuhr: 1,
-          Prayer.asr: 0,
-          Prayer.maghrib: 0,
-          Prayer.isha: 0,
-        },
-        rounding: Rounding.up,
-      );
+  const Singapore({
+    super.fajrAngle = 20.0,
+    super.ishaAngle = 18.0,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments = const {
+      Prayer.fajr: 0,
+      Prayer.sunrise: 0,
+      Prayer.dhuhr: 1,
+      Prayer.asr: 0,
+      Prayer.maghrib: 0,
+      Prayer.isha: 0,
+    },
+    super.polarCircleResolution,
+    super.rounding = Rounding.up,
+    super.shafaq,
+  });
 }
 
 class Tehran extends CalculationMethod {
-  const Tehran() : super(fajrAngle: 17.7, ishaAngle: 14.0, maghribAngle: 4.5);
+  const Tehran({
+    super.fajrAngle = 17.7,
+    super.ishaAngle = 14.0,
+    super.ishaInterval,
+    super.maghribAngle = 4.5,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments,
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class Turkiye extends CalculationMethod {
-  const Turkiye()
-    : super(
-        fajrAngle: 18.0,
-        ishaAngle: 17.0,
-        methodAdjustments: const {
-          Prayer.fajr: 0,
-          Prayer.sunrise: -7,
-          Prayer.dhuhr: 5,
-          Prayer.asr: 4,
-          Prayer.maghrib: 7,
-          Prayer.isha: 0,
-        },
-      );
+  const Turkiye({
+    super.fajrAngle = 18.0,
+    super.ishaAngle = 17.0,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments = const {
+      Prayer.fajr: 0,
+      Prayer.sunrise: -7,
+      Prayer.dhuhr: 5,
+      Prayer.asr: 4,
+      Prayer.maghrib: 7,
+      Prayer.isha: 0,
+    },
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class Morocco extends CalculationMethod {
-  const Morocco()
-    : super(
-        fajrAngle: 19.0,
-        ishaAngle: 17.0,
-        methodAdjustments: const {
-          Prayer.fajr: 0,
-          Prayer.sunrise: -3,
-          Prayer.dhuhr: 5,
-          Prayer.asr: 0,
-          Prayer.maghrib: 5,
-          Prayer.isha: 0,
-        },
-      );
+  const Morocco({
+    super.fajrAngle = 19.0,
+    super.ishaAngle = 17.0,
+    super.ishaInterval,
+    super.maghribAngle,
+    super.madhab,
+    super.highLatitudeRule,
+    super.adjustments,
+    super.methodAdjustments = const {
+      Prayer.fajr: 0,
+      Prayer.sunrise: -3,
+      Prayer.dhuhr: 5,
+      Prayer.asr: 0,
+      Prayer.maghrib: 5,
+      Prayer.isha: 0,
+    },
+    super.polarCircleResolution,
+    super.rounding,
+    super.shafaq,
+  });
 }
 
 class CustomCalculationMethod extends CalculationMethod {

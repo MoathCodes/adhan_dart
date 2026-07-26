@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:adhan_dart/adhan_dart.dart';
 import 'package:test/test.dart';
-import 'package:timezone/data/latest.dart' as tzdata; // renamed alias
+import 'package:timezone/data/latest_all.dart' as tzdata; // renamed alias
 import 'package:timezone/timezone.dart' as tz;
 
 /// Integration test that validates our prayer time calculations against
@@ -33,63 +33,63 @@ void main() {
           // Major cities with different latitudes
           {
             'name': 'Mecca, Saudi Arabia',
-            'coordinates': const Coordinates(21.4225, 39.8262),
+            'coordinates': Coordinates(21.4225, 39.8262),
             'timezone': 'Asia/Riyadh',
             'method': const UmmAlQura(),
           },
           {
             'name': 'New York, USA',
-            'coordinates': const Coordinates(40.7128, -74.0060),
+            'coordinates': Coordinates(40.7128, -74.0060),
             'timezone': 'America/New_York',
             'method': const NorthAmerica(),
           },
           {
             'name': 'London, UK',
-            'coordinates': const Coordinates(51.5074, -0.1278),
+            'coordinates': Coordinates(51.5074, -0.1278),
             'timezone': 'Europe/London',
             'method': const MuslimWorldLeague(),
           },
           {
             'name': 'Cairo, Egypt',
-            'coordinates': const Coordinates(30.0444, 31.2357),
+            'coordinates': Coordinates(30.0444, 31.2357),
             'timezone': 'Africa/Cairo',
             'method': const Egyptian(),
           },
           {
             'name': 'Karachi, Pakistan',
-            'coordinates': const Coordinates(24.8607, 67.0011),
+            'coordinates': Coordinates(24.8607, 67.0011),
             'timezone': 'Asia/Karachi',
             'method': const Karachi(),
           },
           // Southern hemisphere & equatorial
           {
             'name': 'Sydney, Australia',
-            'coordinates': const Coordinates(-33.8688, 151.2093),
+            'coordinates': Coordinates(-33.8688, 151.2093),
             'timezone': 'Australia/Sydney',
             'method': const MuslimWorldLeague(),
           },
           {
             'name': 'Nairobi, Kenya',
-            'coordinates': const Coordinates(-1.286389, 36.817223),
+            'coordinates': Coordinates(-1.286389, 36.817223),
             'timezone': 'Africa/Nairobi',
             'method': const MuslimWorldLeague(),
           },
           // High latitude challenging cases
           {
             'name': 'Oslo, Norway',
-            'coordinates': const Coordinates(59.9139, 10.7522),
+            'coordinates': Coordinates(59.9139, 10.7522),
             'timezone': 'Europe/Oslo',
             'method': const MuslimWorldLeague(),
           },
           {
             'name': 'Reykjavik, Iceland',
-            'coordinates': const Coordinates(64.1466, -21.9426),
+            'coordinates': Coordinates(64.1466, -21.9426),
             'timezone': 'Atlantic/Reykjavik',
             'method': const MuslimWorldLeague(),
           },
           {
             'name': 'Longyearbyen, Svalbard (extreme)',
-            'coordinates': const Coordinates(78.2232, 15.6469),
+            'coordinates': Coordinates(78.2232, 15.6469),
             'timezone': 'Arctic/Longyearbyen',
             'method': const MuslimWorldLeague(),
           },
@@ -117,7 +117,7 @@ void main() {
       'validates calculations for different dates throughout the year',
       () async {
         // Test Mecca across different seasons to check seasonal variations
-        const coordinates = Coordinates(21.4225, 39.8262); // Mecca
+        final coordinates = Coordinates(21.4225, 39.8262); // Mecca
         const method = UmmAlQura();
         const timezone = 'Asia/Riyadh';
 
@@ -148,7 +148,7 @@ void main() {
     );
 
     test('validates DST transition behavior (New York 2024)', () async {
-      const coordinates = Coordinates(40.7128, -74.0060);
+      final coordinates = Coordinates(40.7128, -74.0060);
       const method = NorthAmerica();
       const timezone = 'America/New_York';
 
@@ -180,7 +180,7 @@ void main() {
     test(
       'validates multiple calculation methods consistency for a location',
       () async {
-        const coordinates = Coordinates(51.5074, -0.1278); // London
+        final coordinates = Coordinates(51.5074, -0.1278); // London
         const timezone = 'Europe/London';
         final methods = [
           const MuslimWorldLeague(),
@@ -213,22 +213,22 @@ void main() {
     test('temporal ordering of prayers across diverse locations/dates', () {
       final scenarios = [
         {
-          'coordinates': const Coordinates(21.4225, 39.8262),
+          'coordinates': Coordinates(21.4225, 39.8262),
           'timezone': 'Asia/Riyadh',
           'method': const UmmAlQura(),
         },
         {
-          'coordinates': const Coordinates(64.1466, -21.9426),
+          'coordinates': Coordinates(64.1466, -21.9426),
           'timezone': 'Atlantic/Reykjavik',
           'method': const MuslimWorldLeague(),
         },
         {
-          'coordinates': const Coordinates(-33.8688, 151.2093),
+          'coordinates': Coordinates(-33.8688, 151.2093),
           'timezone': 'Australia/Sydney',
           'method': const MuslimWorldLeague(),
         },
         {
-          'coordinates': const Coordinates(40.7128, -74.0060),
+          'coordinates': Coordinates(40.7128, -74.0060),
           'timezone': 'America/New_York',
           'method': const NorthAmerica(),
         },
@@ -289,7 +289,7 @@ void main() {
 
     test('currentPrayer / nextPrayer transitions around boundaries', () {
       final method = const MuslimWorldLeague();
-      const coordinates = Coordinates(40.7128, -74.0060); // New York
+      final coordinates = Coordinates(40.7128, -74.0060); // New York
       final date = DateTime(2024, 5, 20);
       final pt = PrayerTimes(
         coordinates: coordinates,
@@ -323,7 +323,7 @@ void main() {
         if (t.isBefore(pt.asr)) return Prayer.asr;
         if (t.isBefore(pt.maghrib)) return Prayer.maghrib;
         if (t.isBefore(pt.isha)) return Prayer.isha;
-        return Prayer.fajr; // next day
+        return Prayer.fajrAfter;
       }
 
       for (final moment in transitions) {
@@ -354,7 +354,7 @@ void main() {
 
     test('SunnahTimes internal consistency', () {
       final method = const NorthAmerica();
-      const coordinates = Coordinates(51.5074, -0.1278); // London
+      final coordinates = Coordinates(51.5074, -0.1278); // London
       final date = DateTime(2024, 5, 15);
       final pt = PrayerTimes(
         coordinates: coordinates,
@@ -374,7 +374,7 @@ void main() {
     });
 
     test('High-latitude safety constraints (Reykjavik summer)', () {
-      const coords = Coordinates(64.1466, -21.9426);
+      final coords = Coordinates(64.1466, -21.9426);
       final date = DateTime(2024, 6, 21);
       final method = const MuslimWorldLeague();
       final pt = PrayerTimes(

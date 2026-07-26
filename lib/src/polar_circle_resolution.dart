@@ -55,7 +55,7 @@ class PolarCircleResolver {
 
     return PolarCircleResolvedValues(
       date: date,
-      tomorrow: date.addDays(1),
+      tomorrow: tomorrow,
       coordinates: coordinates,
       solarTime: solarTime,
       tomorrowSolarTime: tomorrowSolarTime,

@@ -8,11 +8,11 @@ void main() {
   tz.initializeTimeZones();
   final location = tz.getLocation('America/New_York');
 
-  // Definitions
-  DateTime date = tz.TZDateTime.from(DateTime.now(), location);
-  Coordinates coordinates = const Coordinates(35.78056, -78.6389);
+  // PrayerTimes uses the calendar date from [date]; times returned are UTC
+  // instants — convert with TZDateTime.from before showing local wall time.
+  final date = tz.TZDateTime.from(DateTime.now(), location);
+  final coordinates = Coordinates(35.78056, -78.6389);
 
-  // Parameters
   final params = CalculationMethod.muslimWorldLeague.copyWith(
     madhab: Madhab.hanafi,
   );
@@ -23,46 +23,33 @@ void main() {
     roundToMinutes: true,
   );
 
-  // Prayer times
-  DateTime fajrTime = tz.TZDateTime.from(prayerTimes.fajr, location);
-  DateTime sunriseTime = tz.TZDateTime.from(prayerTimes.sunrise, location);
-  DateTime dhuhrTime = tz.TZDateTime.from(prayerTimes.dhuhr, location);
-  DateTime asrTime = tz.TZDateTime.from(prayerTimes.asr, location);
-  DateTime maghribTime = tz.TZDateTime.from(prayerTimes.maghrib, location);
-  DateTime ishaTime = tz.TZDateTime.from(prayerTimes.isha, location);
+  // Convert UTC instants to the location's timezone for display.
+  DateTime toLocal(DateTime utc) => tz.TZDateTime.from(utc, location);
 
-  DateTime ishabeforeTime = tz.TZDateTime.from(
-    prayerTimes.ishaBefore,
-    location,
-  );
-  DateTime fajrafterTime = tz.TZDateTime.from(prayerTimes.fajrAfter, location);
+  final fajrTime = toLocal(prayerTimes.fajr);
+  final sunriseTime = toLocal(prayerTimes.sunrise);
+  final dhuhrTime = toLocal(prayerTimes.dhuhr);
+  final asrTime = toLocal(prayerTimes.asr);
+  final maghribTime = toLocal(prayerTimes.maghrib);
+  final ishaTime = toLocal(prayerTimes.isha);
+  final ishaBeforeTime = toLocal(prayerTimes.ishaBefore);
+  final fajrAfterTime = toLocal(prayerTimes.fajrAfter);
 
-  // Convenience Utilities
-  final Prayer current = prayerTimes.currentPrayer(
-    time: DateTime.now(),
-  ); // date: date
-  DateTime? currentPrayerTime = prayerTimes.timeForPrayer(current);
-  final Prayer next = prayerTimes.nextPrayer();
-  DateTime? nextPrayerTime = prayerTimes.timeForPrayer(next);
+  final current = prayerTimes.currentPrayer(time: DateTime.now());
+  final currentPrayerTime = toLocal(prayerTimes.timeForPrayer(current));
+  final next = prayerTimes.nextPrayer();
+  final nextPrayerTime = toLocal(prayerTimes.nextPrayerTime());
 
-  // Sunnah Times
   final sunnahTimes = SunnahTimes(prayerTimes);
-  DateTime middleOfTheNight = tz.TZDateTime.from(
-    sunnahTimes.middleOfTheNight,
-    location,
-  );
-  DateTime lastThirdOfTheNight = tz.TZDateTime.from(
-    sunnahTimes.lastThirdOfTheNight,
-    location,
-  );
+  final middleOfTheNight = toLocal(sunnahTimes.middleOfTheNight);
+  final lastThirdOfTheNight = toLocal(sunnahTimes.lastThirdOfTheNight);
 
-  // Qibla Direction
-  var qiblaDirection = Qibla.qibla(coordinates);
+  final qiblaDirection = Qibla.qibla(coordinates);
 
   print('***** Current Time');
   print('local time:\t$date');
 
-  print('\n***** Prayer Times');
+  print('\n***** Prayer Times (America/New_York)');
   print('fajrTime:\t$fajrTime');
   print('sunriseTime:\t$sunriseTime');
   print('dhuhrTime:\t$dhuhrTime');
@@ -70,12 +57,18 @@ void main() {
   print('maghribTime:\t$maghribTime');
   print('ishaTime:\t$ishaTime');
 
-  print('ishabeforeTime:\t$ishabeforeTime');
-  print('fajrafterTime:\t$fajrafterTime');
+  print('ishaBeforeTime:\t$ishaBeforeTime');
+  print('fajrAfterTime:\t$fajrAfterTime');
 
   print('\n***** Convenience Utilities');
   print('current:\t$current\t$currentPrayerTime');
   print('next:   \t$next\t$nextPrayerTime');
+
+  if (prayerTimes.estimatedPrayers.isNotEmpty) {
+    print(
+      'estimated:\t${prayerTimes.estimatedPrayers.map((p) => p.name).join(', ')}',
+    );
+  }
 
   print('\n***** Sunnah Times');
   print('middleOfTheNight:  \t$middleOfTheNight');

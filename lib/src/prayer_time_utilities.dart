@@ -70,32 +70,39 @@ extension PrayerTimesUtilities on PrayerTimes {
     Prayer.isha: isha,
   };
 
-  /// Formats prayer times for display
+  /// Formats prayer times for display.
   ///
-  /// Example:
+  /// All [PrayerTimes] values are UTC instants (same contract as adhan-js).
+  /// By default this prints the UTC clock time with a `UTC` suffix. Pass
+  /// [convert] to map each instant into a local (or other) zone before
+  /// formatting, for example with the `timezone` package:
+  ///
   /// ```dart
-  /// print(prayerTimes.formatForDisplay());
-  /// // Output:
-  /// // Prayer Times for 2024-01-15:
-  /// // Fajr: 05:30
-  /// // Sunrise: 07:15
-  /// // Dhuhr: 12:30
-  /// // ...
+  /// final riyadh = tz.getLocation('Asia/Riyadh');
+  /// print(prayerTimes.formatForDisplay(
+  ///   convert: (utc) => tz.TZDateTime.from(utc, riyadh),
+  /// ));
   /// ```
   String formatForDisplay({
     bool includeDate = true,
     bool include24Hour = true,
+    DateTime Function(DateTime utc)? convert,
   }) {
     final buffer = StringBuffer();
+    final utcLabel = convert == null ? ' UTC' : '';
 
     if (includeDate) {
       buffer.writeln('Prayer Times for ${date.toString().split(' ')[0]}:');
+      if (convert == null) {
+        buffer.writeln('(times shown in UTC)');
+      }
     }
 
     for (final entry in allPrayerTimes.entries) {
+      final displayTime = convert?.call(entry.value) ?? entry.value;
       final timeStr = include24Hour
-          ? '${entry.value.hour.toString().padLeft(2, '0')}:${entry.value.minute.toString().padLeft(2, '0')}'
-          : _to12HourFormat(entry.value);
+          ? '${displayTime.hour.toString().padLeft(2, '0')}:${displayTime.minute.toString().padLeft(2, '0')}$utcLabel'
+          : '${_to12HourFormat(displayTime)}$utcLabel';
       buffer.writeln('${entry.key.name}: $timeStr');
     }
 
@@ -122,8 +129,8 @@ extension PrayerTimesUtilities on PrayerTimes {
 extension PrayerTimeUtilities on DateTime {
   /// Gets the current prayer time for this DateTime
   ///
-  /// Returns the prayer that should be performed at this time,
-  /// or null if it's between Isha and Fajr (night time).
+  /// Delegates to [PrayerTimes.currentPrayer], including sunrise in the
+  /// day chain and [Prayer.ishaBefore] before Fajr.
   ///
   /// Example:
   /// ```dart
@@ -136,31 +143,16 @@ extension PrayerTimeUtilities on DateTime {
     required Coordinates coordinates,
     required CalculationMethod calculationMethod,
   }) {
-    final prayerTimes = PrayerTimes(
-      date: this,
+    return _prayerTimesFor(
       coordinates: coordinates,
       calculationMethod: calculationMethod,
-    );
-
-    // Check each prayer time in order
-    if (isBefore(prayerTimes.fajr)) {
-      return Prayer.ishaBefore; // Night time (before Fajr)
-    } else if (isBefore(prayerTimes.sunrise)) {
-      return Prayer.fajr;
-    } else if (isBefore(prayerTimes.dhuhr)) {
-      return Prayer.sunrise; // Between sunrise and Dhuhr (no prayer)
-    } else if (isBefore(prayerTimes.asr)) {
-      return Prayer.dhuhr;
-    } else if (isBefore(prayerTimes.maghrib)) {
-      return Prayer.asr;
-    } else if (isBefore(prayerTimes.isha)) {
-      return Prayer.maghrib;
-    } else {
-      return Prayer.isha;
-    }
+    ).currentPrayer(time: this);
   }
 
   /// Gets the next prayer time after this DateTime
+  ///
+  /// Delegates to [PrayerTimes.nextPrayer] and [PrayerTimes.timeForPrayer],
+  /// including sunrise in the chain and [Prayer.fajrAfter] after Isha.
   ///
   /// Example:
   /// ```dart
@@ -174,32 +166,12 @@ extension PrayerTimeUtilities on DateTime {
     required Coordinates coordinates,
     required CalculationMethod calculationMethod,
   }) {
-    final prayerTimes = PrayerTimes(
-      date: this,
+    final prayerTimes = _prayerTimesFor(
       coordinates: coordinates,
       calculationMethod: calculationMethod,
     );
-
-    // Check which prayer comes next
-    if (isBefore(prayerTimes.fajr)) {
-      return NextPrayerInfo(Prayer.fajr, prayerTimes.fajr);
-    } else if (isBefore(prayerTimes.dhuhr)) {
-      return NextPrayerInfo(Prayer.dhuhr, prayerTimes.dhuhr);
-    } else if (isBefore(prayerTimes.asr)) {
-      return NextPrayerInfo(Prayer.asr, prayerTimes.asr);
-    } else if (isBefore(prayerTimes.maghrib)) {
-      return NextPrayerInfo(Prayer.maghrib, prayerTimes.maghrib);
-    } else if (isBefore(prayerTimes.isha)) {
-      return NextPrayerInfo(Prayer.isha, prayerTimes.isha);
-    } else {
-      // After Isha, next prayer is tomorrow's Fajr
-      final tomorrowPrayerTimes = PrayerTimes(
-        date: add(const Duration(days: 1)),
-        coordinates: coordinates,
-        calculationMethod: calculationMethod,
-      );
-      return NextPrayerInfo(Prayer.fajr, tomorrowPrayerTimes.fajr);
-    }
+    final next = prayerTimes.nextPrayer(time: this);
+    return NextPrayerInfo(next, prayerTimes.timeForPrayer(next));
   }
 
   /// Checks if this time is within a prayer window
@@ -223,21 +195,15 @@ extension PrayerTimeUtilities on DateTime {
       throw ArgumentError('Can only check windows for obligatory prayers');
     }
 
-    final prayerTimes = PrayerTimes(
-      date: this,
+    final prayerTimes = _prayerTimesFor(
       coordinates: coordinates,
       calculationMethod: calculationMethod,
     );
 
     final prayerTime = prayerTimes.timeForPrayer(prayer);
-    final nextPrayerTime = _getNextPrayerTime(
-      prayer,
-      prayerTimes,
-      coordinates,
-      calculationMethod,
-    );
+    final windowEnd = _obligatoryPrayerWindowEnd(prayerTimes, prayer);
 
-    return isAfter(prayerTime) && isBefore(nextPrayerTime);
+    return !isBefore(prayerTime) && isBefore(windowEnd);
   }
 
   /// Gets time remaining until the next prayer
@@ -261,32 +227,36 @@ extension PrayerTimeUtilities on DateTime {
     return nextPrayer.time.difference(this);
   }
 
-  DateTime _getNextPrayerTime(
-    Prayer prayer,
-    PrayerTimes prayerTimes,
-    Coordinates coordinates,
-    CalculationMethod calculationMethod,
-  ) {
-    switch (prayer) {
-      case Prayer.fajr:
-        return prayerTimes.dhuhr;
-      case Prayer.dhuhr:
-        return prayerTimes.asr;
-      case Prayer.asr:
-        return prayerTimes.maghrib;
-      case Prayer.maghrib:
-        return prayerTimes.isha;
-      case Prayer.isha:
-        // Next prayer is tomorrow's Fajr
-        final tomorrow = add(const Duration(days: 1));
-        final tomorrowPrayerTimes = PrayerTimes(
-          date: tomorrow,
-          coordinates: coordinates,
-          calculationMethod: calculationMethod,
-        );
-        return tomorrowPrayerTimes.fajr;
-      default:
-        throw ArgumentError('Invalid prayer for window calculation');
-    }
+  PrayerTimes _prayerTimesFor({
+    required Coordinates coordinates,
+    required CalculationMethod calculationMethod,
+  }) {
+    return PrayerTimes(
+      date: _calendarDate(this),
+      coordinates: coordinates,
+      calculationMethod: calculationMethod,
+    );
+  }
+}
+
+/// Normalizes a [DateTime] to UTC midnight of its calendar Y/M/D components.
+DateTime _calendarDate(DateTime dateTime) {
+  return DateTime.utc(dateTime.year, dateTime.month, dateTime.day);
+}
+
+DateTime _obligatoryPrayerWindowEnd(PrayerTimes prayerTimes, Prayer prayer) {
+  switch (prayer) {
+    case Prayer.fajr:
+      return prayerTimes.sunrise;
+    case Prayer.dhuhr:
+      return prayerTimes.asr;
+    case Prayer.asr:
+      return prayerTimes.maghrib;
+    case Prayer.maghrib:
+      return prayerTimes.isha;
+    case Prayer.isha:
+      return prayerTimes.fajrAfter;
+    default:
+      throw ArgumentError('Invalid prayer for window calculation');
   }
 }

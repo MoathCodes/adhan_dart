@@ -33,7 +33,7 @@ void main() {
 
   // 3. Convenient extension methods
   print('\n3. Convenient extension methods:');
-  const meccaCoords = Coordinates(21.3891, 39.8579);
+  final meccaCoords = Coordinates(21.3891, 39.8579);
 
   // Get today's prayer times with one method call
   final todaysPrayers = meccaCoords.todaysPrayerTimes(
@@ -70,7 +70,7 @@ void main() {
 
   // 5. Unified PrayerTimes API
   print('\n5. Unified PrayerTimes API:');
-  const coordinates = Coordinates(35.7796, -78.6382); // Raleigh, NC
+  final coordinates = Coordinates(35.7796, -78.6382); // Raleigh, NC
   final prayerTimes = PrayerTimes(
     date: DateTime.now(),
     coordinates: coordinates,

@@ -1,128 +1,135 @@
 # Adhan Dart
 
-Adhan Dart is a well-tested and well-documented library for calculating Islamic prayer times in Dart. It is an idiomatic Dart port of the excellent [Adhan](https://github.com/batoulapps/Adhan) library (originally in JavaScript).
+Adhan Dart is a well-tested library for calculating Islamic prayer times in Dart. It is an idiomatic Dart port of [Adhan](https://github.com/batoulapps/Adhan) (JavaScript, v4.x parity target).
 
 This library provides:
-*   **High Precision**: Uses astronomical equations from [Astronomical Algorithms](http://www.willbell.com/math/mc1.htm) by Jean Meeus.
-*   **Type Safety**: Full Dart null-safety with robust, non-nullable result guarantees.
-*   **Modern API**: Uses sealed classes, immutable data structures, and idiomatic patterns.
-*   **Performance**: Optimized calculations with caching for high-throughput scenarios.
+
+* **High precision** — astronomical equations from [Astronomical Algorithms](http://www.willbell.com/math/mc1.htm) by Jean Meeus.
+* **Type safety** — full null-safety with non-nullable prayer time results.
+* **adhan-js parity** — UTC instant contract, polar defaults, and navigation semantics aligned with upstream.
+* **Modern API** — immutable data, sealed-style presets, and `copyWith` customization.
 
 ## Installation
 
-Add the dependency to your `pubspec.yaml`:
-
 ```yaml
 dependencies:
-  adhan_dart: ^1.1.2
+  adhan_dart: ^1.2.0
 ```
 
-## Usage
+For timezone conversion in apps, add [`timezone`](https://pub.dev/packages/timezone) separately (not a runtime dependency of this package).
 
-### Initialization Parameters
- 
-**1. Coordinates**
-Create a `Coordinates` object with the latitude and longitude for the location you want prayer times for.
- 
-```dart
-final coordinates = Coordinates(35.78056, -78.6389);
-```
- 
-**2. Date**
-The date parameter passed in should be an instance of the Dart `DateTime` object.
-> **Note**: Unlike JavaScript's `Date` object (which uses 0-indexed months), Dart's `DateTime` uses 1-indexed months (1 = January).
- 
-```dart
-final date = DateTime.now();
-final date = DateTime(2015, 11, 1); // November 1st, 2015
-```
- 
-**3. Calculation Parameters**
-The rest of the needed information is contained within the `CalculationMethod` class.
- 
-### 1. Simple Calculation
-
-To get prayer times, instantiate `PrayerTimes` with your coordinates, date, and calculation method.
+## Quick start
 
 ```dart
 import 'package:adhan_dart/adhan_dart.dart';
 
-// 1. Define location
 final coordinates = Coordinates(21.4225, 39.8262); // Mecca
-
-// 2. Choose a calculation method
 final params = CalculationMethod.ummAlQura;
 
-// 3. Calculate times
 final prayerTimes = PrayerTimes(
   coordinates: coordinates,
   date: DateTime.now(),
   calculationMethod: params,
 );
 
-// 4. Access results (DateTime objects)
-print('Fajr: ${prayerTimes.fajr}');
-print('Dhuhr: ${prayerTimes.dhuhr}');
-print('Asr: ${prayerTimes.asr}');
-print('Maghrib: ${prayerTimes.maghrib}');
-print('Isha: ${prayerTimes.isha}');
+print('Fajr (UTC): ${prayerTimes.fajr}');
+print('Next: ${prayerTimes.nextPrayer()} at ${prayerTimes.nextPrayerTime()}');
 ```
 
-### 2. Customizing Parameters
+See [`example/lib/example.dart`](example/lib/example.dart) for full timezone conversion.
 
-The `CalculationMethod` classes are immutable. Use `copyWith` to customize parameters like `madhab` (for Asr calculation) or `adjustments`.
+## UTC output contract
+
+**All prayer times are UTC `DateTime` instants.** This matches adhan-js: the library computes solar events for the location's longitude and returns universal time. Fields like `.hour` and `.minute` are **UTC clock values**, not the location's local wall time.
+
+Convert before displaying to users:
 
 ```dart
-// Start with a preset
-final params = CalculationMethod.karachi;
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
-// Customize it
-params = params.copyWith(
-  madhab: Madhab.hanafi, // Use Hanafi school for Asr
-  adjustments: {
-    Prayer.fajr: 2, // Add 2 minutes to Fajr
-  }
+tz.initializeTimeZones();
+final location = tz.getLocation('Asia/Riyadh');
+
+final localFajr = tz.TZDateTime.from(prayerTimes.fajr, location);
+```
+
+Or use `formatForDisplay` with a conversion callback:
+
+```dart
+print(prayerTimes.formatForDisplay(
+  convert: (utc) => tz.TZDateTime.from(utc, location),
+));
+```
+
+Without conversion, `formatForDisplay` labels output as UTC. Avoid `.toLocal()` unless the device timezone equals the prayer location.
+
+## Initialization
+
+**Coordinates** — latitude and longitude in decimal degrees. Validated in the constructor (`-90…90`, `-180…180`):
+
+```dart
+final coordinates = Coordinates(35.78056, -78.6389);
+```
+
+**Date** — any `DateTime`; only the calendar date is used for the calculation. Dart months are 1-indexed (1 = January).
+
+**Calculation method** — preset constants on `CalculationMethod` (see table below).
+
+## Customizing parameters
+
+Presets are immutable. Use `copyWith` to override madhab, adjustments, high-latitude rules, polar resolution, etc.:
+
+```dart
+final params = CalculationMethod.karachi.copyWith(
+  madhab: Madhab.hanafi,
+  adjustments: {Prayer.fajr: 2},
 );
-
-final prayerTimes = PrayerTimes(
-  coordinates: coordinates,
-  date: DateTime.now(),
-  calculationMethod: params,
-);
 ```
 
-### 3. Convenience Utilities
+`copyWith` **preserves the preset subclass** — `CalculationMethod.moonsightingCommittee.copyWith(...)` remains a `MoonsightingCommittee`, so `is MoonsightingCommittee` checks keep working after customization.
 
-The library includes several utility methods for common needs.
-
-**Current and Next Prayer:**
-```dart
-final current = prayerTimes.currentPrayer();
-final next = prayerTimes.nextPrayer();
-print('Current Prayer: ${current.name}');
-print('Next Prayer: ${next.name}');
-```
-
-**Sunnah Times (Qiyam):**
-```dart
-final sunnahTimes = prayerTimes.sunnah;
-print('Middle of the Night: ${sunnahTimes.middleOfTheNight}');
-print('Last Third of the Night: ${sunnahTimes.lastThirdOfTheNight}');
-```
-
-**Qibla Direction:**
-```dart
-final qiblaDirection = Qibla.qibla(coordinates);
-print('Qibla Direction: $qiblaDirection degrees');
-```
-
-## Calculation Methods
-
-The library supports standard calculation methods used around the world. You can access them via the `CalculationMethod` class.
+## Prayer navigation
 
 | Method | Description |
-|---|---|
-| `CalculationMethod.muslimWorldLeague` | Muslim World League (Standard) |
+|--------|-------------|
+| `currentPrayer({DateTime? time})` | Active prayer at `time` (default: now) |
+| `nextPrayer({DateTime? time})` | Next prayer after `time` |
+| `nextPrayerTime({DateTime? time})` | UTC instant of the next prayer |
+| `timeForPrayer(Prayer prayer)` | UTC instant for any `Prayer` value |
+
+The chain includes **sunrise** between Fajr and Dhuhr. For cross-day boundaries:
+
+* Before today's Fajr → `currentPrayer()` returns `Prayer.ishaBefore` (previous day's Isha).
+* After today's Isha → `nextPrayer()` returns `Prayer.fajrAfter` (next day's Fajr), **not** `Prayer.fajr`.
+
+```dart
+if (prayerTimes.nextPrayer() == Prayer.fajrAfter) {
+  final tomorrowFajr = prayerTimes.fajrAfter;
+}
+// or simply:
+final nextInstant = prayerTimes.nextPrayerTime();
+```
+
+In adhan-js this edge case uses `Prayer.None`; see [MIGRATION.md](MIGRATION.md).
+
+## Estimated times
+
+When fallbacks produce a prayer time (polar 45° emergency path, etc.), those prayers appear in `estimatedPrayers`:
+
+```dart
+if (prayerTimes.estimatedPrayers.contains(Prayer.fajr)) {
+  // show indicator — time used a safety estimate
+}
+```
+
+The set is unmodifiable.
+
+## Calculation methods
+
+| Method | Description |
+|--------|-------------|
+| `CalculationMethod.muslimWorldLeague` | Muslim World League |
 | `CalculationMethod.egyptian` | Egyptian General Authority of Survey |
 | `CalculationMethod.karachi` | University of Islamic Sciences, Karachi |
 | `CalculationMethod.ummAlQura` | Umm al-Qura University, Makkah |
@@ -133,41 +140,42 @@ The library supports standard calculation methods used around the world. You can
 | `CalculationMethod.qatar` | Qatar |
 | `CalculationMethod.singapore` | Singapore |
 | `CalculationMethod.tehran` | Institute of Geophysics, University of Tehran |
-| `CalculationMethod.turkiye` | Dianet (Turkey) |
-| `CalculationMethod.other` | Custom / Other |
+| `CalculationMethod.turkiye` | Diyanet (Turkey) |
+| `CalculationMethod.morocco` | Morocco (Ministry of Awqaf) |
+| `CalculationMethod.other` | Custom angles — set `fajrAngle` / `ishaAngle` via `copyWith` |
 
-**Dot Shorthand Support:**
-You can also use static constants for cleaner code:
+Dot shorthand: `const Karachi()`, `const MoonsightingCommittee()`, etc.
+
+## Advanced features
+
+**Precision** — times round to the nearest minute by default. Pass `roundToMinutes: false` for second precision.
+
+**High latitude** — when twilight persists, Fajr/Isha use `highLatitudeRule` (default: `middleOfTheNight`). Options: `seventhOfTheNight`, `twilightAngle`.
+
+**Polar circle resolution** — default is `PolarCircleResolution.unresolved` (same as adhan-js). Resolution runs **only when solar sunrise/sunset are invalid** (polar edge cases). Mid-latitude locations are not modified.
+
+To opt into nearest-latitude resolution (previous adhan_dart default):
+
 ```dart
-final params = CalculationMethod.karachi;
-// vs
-final params = const Karachi();
-```
-
-## Advanced Features
-
-**Time Precision:**
-By default, times are rounded to the nearest minute. To get precise times (seconds), set `roundToMinutes: false`.
-
-```dart
-final preciseTimes = PrayerTimes(
-  coordinates: coordinates,
-  date: DateTime.now(),
-  calculationMethod: params,
-  roundToMinutes: false,
+final params = CalculationMethod.muslimWorldLeague.copyWith(
+  polarCircleResolution: PolarCircleResolution.aqrabBalad,
 );
 ```
 
-**High Latitude Rules:**
-For locations at high latitudes (where twilight may persist or the sun may not set), the library automatically handles fallbacks. You can customize the rule used via `highLatitudeRule` in `CalculationMethod`.
+Also available: `PolarCircleResolution.aqrabYaum` (nearest valid day).
 
-*   `HighLatitudeRule.middleOfTheNight` (Default)
-*   `HighLatitudeRule.seventhOfTheNight`
-*   `HighLatitudeRule.twilightAngle`
+If times are still invalid after resolution, a 45° latitude emergency fallback may run; affected prayers are listed in `estimatedPrayers`.
 
-**Polar Circle Resolution:**
-The library automatically resolves invalid times in polar regions using `PolarCircleResolution.aqrabBalad` (Nearest Latitude) by default. This ensures you always get a valid `DateTime` result, preventing crashes or null values in your app.
+**Sunset** — `prayerTimes.sunset` exposes solar sunset (pre-maghrib-angle), matching adhan-js.
+
+**Sunnah times** — `prayerTimes.sunnah` for middle/last third of the night.
+
+**Qibla** — `Qibla.qibla(coordinates)` returns bearing in degrees.
+
+## Migration
+
+Upgrading from adhan-js or adhan_dart 1.1.x? See [MIGRATION.md](MIGRATION.md).
 
 ## License
 
-Adhan Dart is available under the MIT license. See the LICENSE file for more info.
+MIT — see [LICENSE](LICENSE).

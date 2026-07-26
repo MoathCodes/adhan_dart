@@ -6,20 +6,6 @@ import 'dart:math' as math;
 
 import 'package:adhan_dart/adhan_dart.dart';
 
-int dayOfYear(DateTime date) {
-  final year = date.year;
-  final isLeapYear = (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
-  final daysInFeb = isLeapYear ? 29 : 28;
-  final months = [31, daysInFeb, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-  int dayOfYear = 0;
-  for (var i = 0; i < date.month - 1; i++) {
-    dayOfYear += months[i];
-  }
-  dayOfYear += date.day;
-  return dayOfYear;
-}
-
 // Mathematical utility functions
 double degreesToRadians(double degrees) => (degrees * math.pi) / 180.0;
 
@@ -39,6 +25,15 @@ double quadrantShiftAngle(double angle) {
 double radiansToDegrees(double radians) => (radians * 180.0) / math.pi;
 
 double unwindAngle(double angle) => normalizeToScale(angle, 360.0);
+
+/// Porter parity for adhan-js `Madhab.getShadowLength()`.
+///
+/// Equivalent to the top-level [shadowLength] function exported from
+/// `madhab.dart`.
+extension MadhabShadowLength on Madhab {
+  /// Asr shadow length multiplier (1 = Shafi'i, 2 = Hanafi).
+  int get asrShadowLength => shadowLength(this);
+}
 
 /// Extension to provide convenient prayer times calculation from coordinates
 extension CoordinatesExtension on Coordinates {
@@ -72,7 +67,7 @@ extension CoordinatesExtension on Coordinates {
 
 /// Extensions for common DateTime operations.
 extension DateTimeExtensions on DateTime {
-  /// Returns the day of year (1-based).
+  /// Returns the day of year (1-based, calendar-safe).
   int get dayOfYear {
     final diff = difference(DateTime(year, 1, 1, 0, 0));
     return diff.inDays + 1; // 1st Jan should be day 1

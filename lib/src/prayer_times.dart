@@ -22,6 +22,7 @@ class PrayerTimes {
   final DateTime sunrise;
   final DateTime dhuhr;
   final DateTime asr;
+  final DateTime sunset;
   final DateTime maghrib;
   final DateTime isha;
 
@@ -29,6 +30,9 @@ class PrayerTimes {
   final DateTime fajrAfter;
 
   /// Prayers whose times were produced using a safety fallback.
+  ///
+  /// Only core [Prayer] values are tracked; cross-day helpers ([ishaBefore],
+  /// [fajrAfter]) are omitted even when safe-bound clamps adjust them.
   final Set<Prayer> estimatedPrayers;
 
   PrayerTimes copyWith({
@@ -39,6 +43,7 @@ class PrayerTimes {
     DateTime? sunrise,
     DateTime? dhuhr,
     DateTime? asr,
+    DateTime? sunset,
     DateTime? maghrib,
     DateTime? isha,
     DateTime? ishaBefore,
@@ -53,11 +58,14 @@ class PrayerTimes {
       sunrise: sunrise ?? this.sunrise,
       dhuhr: dhuhr ?? this.dhuhr,
       asr: asr ?? this.asr,
+      sunset: sunset ?? this.sunset,
       maghrib: maghrib ?? this.maghrib,
       isha: isha ?? this.isha,
       ishaBefore: ishaBefore ?? this.ishaBefore,
       fajrAfter: fajrAfter ?? this.fajrAfter,
-      estimatedPrayers: estimatedPrayers ?? this.estimatedPrayers,
+      estimatedPrayers: estimatedPrayers == null
+          ? this.estimatedPrayers
+          : Set<Prayer>.unmodifiable(estimatedPrayers),
     );
   }
 
@@ -69,6 +77,7 @@ class PrayerTimes {
     required this.sunrise,
     required this.dhuhr,
     required this.asr,
+    required this.sunset,
     required this.maghrib,
     required this.isha,
     required this.ishaBefore,
@@ -99,16 +108,11 @@ class PrayerTimes {
     bool needsResolution =
         solarToday.sunrise.isNaN ||
         solarToday.sunset.isNaN ||
-        solarAfter.sunrise.isNaN ||
-        solarAfter.sunset.isNaN ||
-        solarBefore.sunset.isNaN;
+        solarAfter.sunrise.isNaN;
 
     var resolver = calculationMethod.polarCircleResolution;
-    if (needsResolution && resolver == PolarCircleResolution.unresolved) {
-      resolver = PolarCircleResolution.aqrabBalad;
-    }
 
-    if (needsResolution || resolver != PolarCircleResolution.unresolved) {
+    if (needsResolution && resolver != PolarCircleResolution.unresolved) {
       final resolvedToday = PolarCircleResolver.resolve(
         resolver,
         date,
@@ -137,7 +141,9 @@ class PrayerTimes {
     }
 
     // 3. Fallback for Extreme Failures
+    var usedEmergencyFallback = false;
     if (solarToday.sunrise.isNaN || solarToday.sunset.isNaN) {
+      usedEmergencyFallback = true;
       final safeCoords = Coordinates(
         45.0 * coordinates.latitude.sign,
         coordinates.longitude,
@@ -149,7 +155,7 @@ class PrayerTimes {
     }
 
     // 4. Calculate Core Times
-    final shadowLengthValue = shadowLength(calculationMethod.madhab);
+    final shadowLengthValue = shadowLength(calculationMethod.madhab).toDouble();
 
     DateTime dhuhrTime = TimeComponents(
       solarToday.transit,
@@ -163,7 +169,9 @@ class PrayerTimes {
     ).utcDate(date.year, date.month, date.day);
 
     double asrAngleTime = solarToday.afternoon(shadowLengthValue);
+    var usedAsrEmergencyFallback = false;
     if (asrAngleTime.isNaN) {
+      usedAsrEmergencyFallback = true;
       final safeSolar = SolarTime(
         date,
         Coordinates(45.0 * coordinates.latitude.sign, coordinates.longitude),
@@ -183,9 +191,10 @@ class PrayerTimes {
     DateTime sunsetAfterTime = TimeComponents(
       solarAfter.sunset,
     ).utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
+    final DateTime dateAfterAfter = dateAfter.addDays(1);
     DateTime sunriseAfterAfterTime = TimeComponents(
       solarAfterAfter.sunrise,
-    ).utcDate(dateAfter.year, dateAfter.month, dateAfter.day);
+    ).utcDate(dateAfterAfter.year, dateAfterAfter.month, dateAfterAfter.day);
 
     final int nightSeconds = sunriseAfterTime.difference(sunsetTime).inSeconds;
     final int nightSecondsBefore = sunriseTime
@@ -296,29 +305,15 @@ class PrayerTimes {
     if (calculationMethod is MoonsightingCommittee &&
         coordinates.latitude >= 55) {
       final double fraction = nightSeconds / 7;
-      final fallbackFajr = sunriseTime.addSeconds(-fraction.round());
-      if (fajrTime == null ||
-          fajrTime.isAfter(sunriseTime) ||
-          fajrTime.difference(sunriseTime).inMinutes > 300) {
-        fajrTime = fallbackFajr;
-        estimated.add(Prayer.fajr);
-      }
+      fajrTime = sunriseTime.addSeconds(-fraction.round());
 
       final double fractionAfter = nightSecondsAfter / 7;
-      final fallbackFajrAfter = sunriseAfterTime.addSeconds(
-        -fractionAfter.round(),
-      );
-      if (fajrAfterTime == null ||
-          fajrAfterTime.isAfter(sunriseAfterTime) ||
-          fajrAfterTime.difference(sunriseAfterTime).inMinutes > 300) {
-        fajrAfterTime = fallbackFajrAfter;
-      }
+      fajrAfterTime = sunriseAfterTime.addSeconds(-fractionAfter.round());
 
-      final double fractionIsha = nightSeconds / 7;
-      final fallbackIsha = sunsetTime.addSeconds(fractionIsha.round());
       if (calculationMethod.ishaInterval == null ||
           calculationMethod.ishaInterval! <= 0) {
-        ishaTime = fallbackIsha;
+        final double fractionIsha = nightSeconds / 7;
+        ishaTime = sunsetTime.addSeconds(fractionIsha.round());
       }
     }
 
@@ -394,6 +389,25 @@ class PrayerTimes {
         (calculationMethod.adjustments[Prayer.isha] ?? 0) +
         (calculationMethod.methodAdjustments[Prayer.isha] ?? 0);
 
+    if (usedEmergencyFallback) {
+      estimated.addAll({
+        Prayer.fajr,
+        Prayer.sunrise,
+        Prayer.dhuhr,
+        Prayer.asr,
+        Prayer.maghrib,
+        Prayer.isha,
+      });
+    }
+    if (usedAsrEmergencyFallback) {
+      estimated.add(Prayer.asr);
+    }
+
+    final rounding = calculationMethod.rounding;
+    final sunsetRounded = roundToMinutes
+        ? sunsetTime.roundedMinute(rounding: rounding)
+        : sunsetTime;
+
     return PrayerTimes._(
       date: date,
       coordinates: coordinates,
@@ -417,6 +431,7 @@ class PrayerTimes {
         calculationMethod.rounding,
       ),
       asr: _adjust(asrTime, asrAdj, roundToMinutes, calculationMethod.rounding),
+      sunset: sunsetRounded,
       maghrib: _adjust(
         maghribTime,
         maghribAdj,
@@ -441,7 +456,8 @@ class PrayerTimes {
         roundToMinutes,
         calculationMethod.rounding,
       ),
-      estimatedPrayers: estimated,
+      estimatedPrayers:
+          estimated.isEmpty ? const {} : Set<Prayer>.unmodifiable(estimated),
     );
   }
 
@@ -524,7 +540,12 @@ class PrayerTimes {
     if (now.isBefore(asr)) return Prayer.asr;
     if (now.isBefore(maghrib)) return Prayer.maghrib;
     if (now.isBefore(isha)) return Prayer.isha;
-    return Prayer.fajr;
+    return Prayer.fajrAfter;
+  }
+
+  /// Returns the time of the next prayer based on the given [time] (or now).
+  DateTime nextPrayerTime({DateTime? time}) {
+    return timeForPrayer(nextPrayer(time: time));
   }
 
   /// Returns the time for the specified [prayer].
@@ -560,8 +581,16 @@ class PrayerTimes {
             sunrise == other.sunrise &&
             dhuhr == other.dhuhr &&
             asr == other.asr &&
+            sunset == other.sunset &&
             maghrib == other.maghrib &&
-            isha == other.isha;
+            isha == other.isha &&
+            ishaBefore == other.ishaBefore &&
+            fajrAfter == other.fajrAfter &&
+            _setEquals(estimatedPrayers, other.estimatedPrayers);
+  }
+
+  static bool _setEquals<T>(Set<T> a, Set<T> b) {
+    return a.length == b.length && a.containsAll(b);
   }
 
   @override
@@ -573,8 +602,12 @@ class PrayerTimes {
     sunrise,
     dhuhr,
     asr,
+    sunset,
     maghrib,
     isha,
+    ishaBefore,
+    fajrAfter,
+    Object.hashAllUnordered(estimatedPrayers),
   );
 
   @override

@@ -23,7 +23,9 @@ class Qibla {
   /// print(qiblaAngle); // prints a value of 28.015999604802534
   /// ```
   static double qibla(Coordinates coordinates) {
-    Coordinates makkah = const Coordinates(21.4225241, 39.8261818);
+    Coordinates.validated(coordinates.latitude, coordinates.longitude);
+
+    final makkah = Coordinates(21.4225241, 39.8261818);
 
     // Equation from "Spherical Trigonometry For the use of colleges and schools" page 50
     double term1 = (sin(

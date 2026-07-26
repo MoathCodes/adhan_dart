@@ -21,3 +21,36 @@
 1.1.1: Fixed documentation, calculation parameters bug fix.
 
 1.1.2: Explicit method, fajrAngle, ishaAngle for CalculationParameters; coordinates, date, params for PrayerTimes.
+
+## 1.2.0
+
+### Breaking changes
+
+- **Polar circle default:** `CalculationMethod.polarCircleResolution` now defaults to `PolarCircleResolution.unresolved` (matching adhan-js). Previously `aqrabBalad` was applied automatically and could shift mid-latitude results. Opt in with `copyWith(polarCircleResolution: PolarCircleResolution.aqrabBalad)`.
+- **`nextPrayer` after Isha:** Returns `Prayer.fajrAfter` instead of `Prayer.fajr`. Use `nextPrayerTime()` or `timeForPrayer(Prayer.fajrAfter)` for tomorrow's Fajr instant.
+- **`Coordinates`:** Factory constructor validates lat/lng; `Coordinates(...)` is no longer supported. Use `Coordinates(lat, lng)`.
+
+### Added
+
+- `PrayerTimes.nextPrayerTime({DateTime? time})` — returns the UTC instant of the next prayer.
+- `PrayerTimes.sunset` — solar sunset (same instant as pre-angle maghrib).
+- `PrayerTimes.estimatedPrayers` — unmodifiable set of prayers whose times used a safety fallback.
+- `CalculationMethod.morocco` / `Morocco()` preset.
+- `MIGRATION.md` for adhan-js and 1.1.x upgrades.
+- IDL correction in astronomical transit calculation (parity with adhan-js).
+
+### Changed
+
+- `copyWith` on calculation method presets preserves runtime type (e.g. `MoonsightingCommittee.copyWith` stays `MoonsightingCommittee`).
+- `fromJson` applies field overrides onto preset subclasses instead of discarding custom adjustments.
+- Moonsighting Committee Fajr/Isha handling at latitude ≥ 55° aligned with adhan-js.
+- Polar resolution triggers only when solar times are invalid and a non-`unresolved` resolver is set.
+- `formatForDisplay` documents UTC output and accepts an optional `convert` callback for local display.
+- Removed static cache from `SunnahTimes`.
+
+### Fixed
+
+- `fajrAfter` cross-day instant: `sunriseAfterAfter` (date+2) was stamped with date+1 calendar components, breaking night-length math and `fajrAfter` vs next-day `fajr` parity.
+- Utility extensions (`getCurrentPrayer`, `getNextPrayer`, `timeUntilNextPrayer`) delegate to `PrayerTimes` and include sunrise / `fajrAfter` in the chain.
+- `estimatedPrayers`, `ishaBefore`, and `fajrAfter` included in `PrayerTimes` equality.
+- Coordinate validation throws consistently (constructor, `fromJson`, `Qibla.qibla`).
